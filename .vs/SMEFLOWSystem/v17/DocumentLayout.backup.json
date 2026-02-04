@@ -1,0 +1,178 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CBA16A19-793E-47BF-9FFF-FBADBFD30CE7}|SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj|d:\\project\\projectmonhoc\\exe101\\smeflowsystem\\smeflowsystem.application\\interfaces\\irepositories\\irolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CBA16A19-793E-47BF-9FFF-FBADBFD30CE7}|SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj|solutionrelative:smeflowsystem.application\\interfaces\\irepositories\\irolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9BC37C3E-4FD7-418F-BA24-2F45A1F7ABB3}|SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj|d:\\project\\projectmonhoc\\exe101\\smeflowsystem\\smeflowsystem.infrastructure\\repositories\\rolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9BC37C3E-4FD7-418F-BA24-2F45A1F7ABB3}|SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj|solutionrelative:smeflowsystem.infrastructure\\repositories\\rolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9BC37C3E-4FD7-418F-BA24-2F45A1F7ABB3}|SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj|d:\\project\\projectmonhoc\\exe101\\smeflowsystem\\smeflowsystem.infrastructure\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9BC37C3E-4FD7-418F-BA24-2F45A1F7ABB3}|SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj|solutionrelative:smeflowsystem.infrastructure\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CBA16A19-793E-47BF-9FFF-FBADBFD30CE7}|SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj|d:\\project\\projectmonhoc\\exe101\\smeflowsystem\\smeflowsystem.application\\interfaces\\irepositories\\iuserrolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CBA16A19-793E-47BF-9FFF-FBADBFD30CE7}|SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj|solutionrelative:smeflowsystem.application\\interfaces\\irepositories\\iuserrolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9BC37C3E-4FD7-418F-BA24-2F45A1F7ABB3}|SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj|d:\\project\\projectmonhoc\\exe101\\smeflowsystem\\smeflowsystem.infrastructure\\repositories\\userrolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9BC37C3E-4FD7-418F-BA24-2F45A1F7ABB3}|SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj|solutionrelative:smeflowsystem.infrastructure\\repositories\\userrolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CBA16A19-793E-47BF-9FFF-FBADBFD30CE7}|SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj|d:\\project\\projectmonhoc\\exe101\\smeflowsystem\\smeflowsystem.application\\interfaces\\irepositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CBA16A19-793E-47BF-9FFF-FBADBFD30CE7}|SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj|solutionrelative:smeflowsystem.application\\interfaces\\irepositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 16,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RoleRepository.cs",
+              "DocumentMoniker": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Infrastructure\\Repositories\\RoleRepository.cs",
+              "RelativeDocumentMoniker": "SMEFLOWSystem.Infrastructure\\Repositories\\RoleRepository.cs",
+              "ToolTip": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Infrastructure\\Repositories\\RoleRepository.cs",
+              "RelativeToolTip": "SMEFLOWSystem.Infrastructure\\Repositories\\RoleRepository.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAmwFcAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-04T03:41:37.195Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{004be353-6879-467c-9d1e-9ac23cdf6d49}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:27:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:34:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:40:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserRepository.cs",
+              "DocumentMoniker": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Infrastructure\\Repositories\\UserRepository.cs",
+              "RelativeDocumentMoniker": "SMEFLOWSystem.Infrastructure\\Repositories\\UserRepository.cs",
+              "ToolTip": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Infrastructure\\Repositories\\UserRepository.cs",
+              "RelativeToolTip": "SMEFLOWSystem.Infrastructure\\Repositories\\UserRepository.cs",
+              "ViewState": "AgIAAH0AAAAAAAAAAAAcwIYAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-04T03:41:17.599Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "IRoleRepository.cs",
+              "DocumentMoniker": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IRoleRepository.cs",
+              "RelativeDocumentMoniker": "SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IRoleRepository.cs",
+              "ToolTip": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IRoleRepository.cs",
+              "RelativeToolTip": "SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IRoleRepository.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAswBIAAABUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-04T03:35:11.822Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UserRoleRepository.cs",
+              "DocumentMoniker": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Infrastructure\\Repositories\\UserRoleRepository.cs",
+              "RelativeDocumentMoniker": "SMEFLOWSystem.Infrastructure\\Repositories\\UserRoleRepository.cs",
+              "ToolTip": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Infrastructure\\Repositories\\UserRoleRepository.cs",
+              "RelativeToolTip": "SMEFLOWSystem.Infrastructure\\Repositories\\UserRoleRepository.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAiwCgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-04T03:34:56.404Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IUserRoleRepository.cs",
+              "DocumentMoniker": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRoleRepository.cs",
+              "RelativeDocumentMoniker": "SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRoleRepository.cs",
+              "ToolTip": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRoleRepository.cs",
+              "RelativeToolTip": "SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRoleRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-04T03:34:45.738Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRepository.cs",
+              "ToolTip": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRepository.cs",
+              "RelativeToolTip": "SMEFLOWSystem.Application\\Interfaces\\IRepositories\\IUserRepository.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwBoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-04T03:34:42.777Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
