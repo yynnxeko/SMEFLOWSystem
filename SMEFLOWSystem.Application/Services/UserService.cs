@@ -4,6 +4,7 @@ using SMEFLOWSystem.Application.DTOs.RoleDtos;
 using SMEFLOWSystem.Application.DTOs.UserDtos;
 using SMEFLOWSystem.Application.Interfaces.IRepositories;
 using SMEFLOWSystem.Application.Interfaces.IServices;
+using SMEFLOWSystem.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,13 +76,17 @@ namespace SMEFLOWSystem.Application.Services
 
         public async Task<UserDto> UpdateAsync(Guid id, UserUpdatedDto user)
         {
-            var existingUser = await  _userRepository.GetUserByIdAsync(id);
+            var existingUser = await _userRepository.GetUserByIdAsync(id);
             if (existingUser == null)
             {
                 throw new ArgumentException($"User with id {id} is not existed");
             }
-            var updatedUser = await _userRepository.UpdateUserAsync(existingUser.Id, user);
+            var userEntity = _mapper.Map<User>(user);
+            userEntity.Id = existingUser.Id;
+
+            var updatedUser = await _userRepository.UpdateUserAsync(userEntity);
             return _mapper.Map<UserDto>(updatedUser);
+
         }
 
         public Task UpdatePasswordAsync(Guid id, string password)

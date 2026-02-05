@@ -1,5 +1,6 @@
 ﻿using SharedKernel.DTOs;
 using SMEFLOWSystem.Application.DTOs.UserDtos;
+using SMEFLOWSystem.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

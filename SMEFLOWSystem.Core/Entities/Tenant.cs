@@ -16,7 +16,8 @@ public partial class Tenant
     public string Status { get; set; }
 
     public DateOnly? SubscriptionEndDate { get; set; }
-
+    public Guid? OwnerUserId { get; set; }
+    public User? OwnerUser { get; set; }
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }

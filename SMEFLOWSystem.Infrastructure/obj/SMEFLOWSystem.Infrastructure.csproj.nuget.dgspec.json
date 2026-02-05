@@ -66,6 +66,10 @@
               "target": "Package",
               "version": "[12.0.1, )"
             },
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
             "MailKit": {
               "target": "Package",
               "version": "[4.14.1, )"
@@ -123,7 +127,11 @@
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj": {
+                "projectPath": "D:\\Project\\ProjectMonHoc\\EXE101\\SMEFLOWSystem\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
@@ -221,6 +229,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Http.Abstractions": {
+              "target": "Package",
+              "version": "[2.3.9, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.22, )"
@@ -240,6 +252,14 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.22, )"
+            },
+            "Microsoft.Extensions.Configuration.FileExtensions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             }
           },
           "imports": [

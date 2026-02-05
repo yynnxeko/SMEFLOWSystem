@@ -92,5 +92,11 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
                 .Select(ur => ur.User)
                 .ToListAsync();
         }
+
+        public async Task AddAsync(Role role)
+        {
+            await _context.Roles.AddAsync(role);
+            await _context.SaveChangesAsync();
+        }
     }
 }

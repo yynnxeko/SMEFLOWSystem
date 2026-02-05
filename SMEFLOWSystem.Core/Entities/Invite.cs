@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SMEFLOWSystem.SharedKernel.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SMEFLOWSystem.Core.Entities
 {
-    public partial class Invite
+    public partial class Invite : ITenantEntity
     {
         public Guid Id { get; set; } = Guid.NewGuid();  // Thêm Id (GUID default)
         public Guid TenantId { get; set; }

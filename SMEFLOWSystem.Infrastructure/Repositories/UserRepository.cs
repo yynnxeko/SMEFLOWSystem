@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SharedKernel.DTOs;
-using SMEFLOWSystem.Application.DTOs.UserDtos;
 using SMEFLOWSystem.Application.Interfaces.IRepositories;
 using SMEFLOWSystem.Core.Entities;
 using SMEFLOWSystem.Infrastructure.Data;
@@ -64,6 +63,8 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
         {
             return await _context.Users
                 .Include(x => x.Tenant)
+                .Include(x => x.UserRoles)
+                    .ThenInclude(ur => ur.Role)
                 .Where(x => !x.IsDeleted)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
@@ -106,19 +107,19 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
             return user;
         }
 
-        public async Task<User?> UpdateUserAsync(Guid id, UserUpdatedDto dto)
+        public async Task<User?> UpdateUserAsync(User user)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null)
-            {
-                return null;
-            }
-            user.FullName = dto.FullName;
-            user.Phone = dto.Phone;
-            user.IsActive = dto.IsActive;
-            user.IsDeleted = dto.IsDeleted;
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
+            if (existingUser == null) return null;
+
+            existingUser.FullName = user.FullName;
+            existingUser.Phone = user.Phone;
+            existingUser.IsActive = user.IsActive;
+            existingUser.IsDeleted = user.IsDeleted;
+
             await _context.SaveChangesAsync();
-            return user;
+            return existingUser;
+
         }
 
         public async Task<bool?> CheckUserIsDeleted(Guid id)
@@ -156,6 +157,12 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
             _context.UserRoles.Remove(userRole);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task AddAsync(User user)
+        {
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

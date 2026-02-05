@@ -5,6 +5,7 @@ D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Deb
 D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Debug\net8.0\SMEFLOWSystem.SharedKernel.AssemblyInfoInputs.cache
 D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Debug\net8.0\SMEFLOWSystem.SharedKernel.AssemblyInfo.cs
 D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Debug\net8.0\SMEFLOWSystem.SharedKernel.csproj.CoreCompileInputs.cache
+D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Debug\net8.0\SMEFLOWSystem.SharedKernel.sourcelink.json
 D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Debug\net8.0\SMEFLOWSystem.SharedKernel.dll
 D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Debug\net8.0\refint\SMEFLOWSystem.SharedKernel.dll
 D:\Project\ProjectMonHoc\EXE101\SMEFLOWSystem\SMEFLOWSystem.SharedKernel\obj\Debug\net8.0\SMEFLOWSystem.SharedKernel.pdb

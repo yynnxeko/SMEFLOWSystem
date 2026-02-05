@@ -649,6 +649,9 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<Guid?>("OwnerUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -667,6 +670,8 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
 
                     b.HasKey("Id")
                         .HasName("PK__Tenants__3214EC0740A20BD5");
+
+                    b.HasIndex("OwnerUserId");
 
                     b.HasIndex("SubscriptionPlanId");
 
@@ -702,6 +707,11 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsVerified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -920,11 +930,18 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("SMEFLOWSystem.Core.Entities.Tenant", b =>
                 {
+                    b.HasOne("SMEFLOWSystem.Core.Entities.User", "OwnerUser")
+                        .WithMany()
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("SMEFLOWSystem.Core.Entities.SubscriptionPlan", "SubscriptionPlan")
                         .WithMany("Tenants")
                         .HasForeignKey("SubscriptionPlanId")
                         .IsRequired()
                         .HasConstraintName("FK_Tenants_SubscriptionPlans");
+
+                    b.Navigation("OwnerUser");
 
                     b.Navigation("SubscriptionPlan");
                 });

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SMEFLOWSystem.SharedKernel")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0ce4c355a55449f10888043fa46858c12fa77deb")]
 [assembly: System.Reflection.AssemblyProductAttribute("SMEFLOWSystem.SharedKernel")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SMEFLOWSystem.SharedKernel")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -17,13 +17,13 @@ namespace SMEFLOWSystem.Application.Interfaces.IRepositories
         Task<User?> GetUserByEmailAsync(string email);
         Task<List<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(Guid id);
-        Task<User?> UpdateUserAsync(Guid id, UserUpdatedDto dto);
+        Task<User?> UpdateUserAsync(User user);
         Task<User?> UpdatePasswordAsync(Guid id, string password);
         Task<PagedResultDto<User>> GetAllUserPagingAsync(PagingRequestDto request);
         Task<bool?> CheckUserIsDeleted(Guid id);
         Task<List<Role>> GetRolesByUserIdAsync(Guid userId);
         Task<bool> AddRoleToUserAsync(Guid userId, int roleId);
         Task<bool> RemoveRoleFromUserAsync(Guid userId, int roleId);
-
+        Task AddAsync(User user);
     }
 }

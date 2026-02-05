@@ -82,5 +82,68 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.SubscriptionPlanController",
+    "Method": "AddAsync",
+    "RelativePath": "api/SubscriptionPlan",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "SMEFLOWSystem.Application.DTOs.SubscriptionPlanDtos.SubscriptionPlanDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.SubscriptionPlanController",
+    "Method": "GetByIdAsync",
+    "RelativePath": "api/SubscriptionPlan/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.SubscriptionPlanController",
+    "Method": "UpdateAsync",
+    "RelativePath": "api/SubscriptionPlan/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "SMEFLOWSystem.Application.DTOs.SubscriptionPlanDtos.SubscriptionPlanDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.SubscriptionPlanController",
+    "Method": "GetAllAsync",
+    "RelativePath": "api/SubscriptionPlan/all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
   }
 ]
