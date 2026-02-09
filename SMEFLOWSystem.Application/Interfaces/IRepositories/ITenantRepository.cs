@@ -11,5 +11,8 @@ namespace SMEFLOWSystem.Application.Interfaces.IRepositories
     {
         Task AddAsync(Tenant tenant);
         Task UpdateAsync(Tenant tenant);
+        Task<Tenant?> GetByIdAsync(Guid tenantId);
+        Task<Tenant?> GetByIdIgnoreTenantAsync(Guid tenantId);
+        Task UpdateIgnoreTenantAsync(Tenant tenant);
     }
 }

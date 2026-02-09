@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("fb91a13c-ea5b-41fd-ae23-b4b4d00db5d9")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("SMEFLOWSystem.WebAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0ce4c355a55449f10888043fa46858c12fa77deb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0277f4f471c1fd2320870043561e104ecee62d11")]
 [assembly: System.Reflection.AssemblyProductAttribute("SMEFLOWSystem.WebAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SMEFLOWSystem.WebAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

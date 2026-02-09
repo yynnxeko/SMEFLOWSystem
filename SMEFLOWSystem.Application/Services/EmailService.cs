@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using SMEFLOWSystem.Application.Interfaces.IServices;
@@ -18,17 +19,39 @@ namespace SMEFLOWSystem.Application.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(_settings.FromName, _settings.FromEmail));
-            message.To.Add(new MailboxAddress("", toEmail));
-            message.Subject = subject;
-            message.Body = new TextPart("html") { Text = body };  // HTML body cho magic link
+            var email = new MimeMessage();
+            if (string.IsNullOrWhiteSpace(_settings.FromName))
+                throw new InvalidOperationException("Missing config: EmailSettings:FromName");
+            if (string.IsNullOrWhiteSpace(_settings.FromEmail))
+                throw new InvalidOperationException("Missing config: EmailSettings:FromEmail");
+            if (string.IsNullOrWhiteSpace(_settings.SmtpServer))
+                throw new InvalidOperationException("Missing config: EmailSettings:SmtpServer");
+            if (_settings.SmtpPort <= 0)
+                throw new InvalidOperationException("Invalid config: EmailSettings:SmtpPort");
+            if (string.IsNullOrWhiteSpace(_settings.Username))
+                throw new InvalidOperationException("Missing config: EmailSettings:Username");
+            if (string.IsNullOrWhiteSpace(_settings.Password))
+                throw new InvalidOperationException("Missing config: EmailSettings:Password");
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(_settings.SmtpServer, _settings.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_settings.Username, _settings.Password);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(true);
+            email.From.Add(new MailboxAddress(_settings.FromName, _settings.FromEmail));
+            email.To.Add(MailboxAddress.Parse(toEmail));
+            email.Subject = subject;
+
+            var builder = new BodyBuilder();
+            builder.HtmlBody = body; // Cho phép gửi HTML
+            email.Body = builder.ToMessageBody();
+
+            using var smtp = new SmtpClient();
+            try
+            {
+                await smtp.ConnectAsync(_settings.SmtpServer, _settings.SmtpPort, SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(_settings.Username, _settings.Password);
+                await smtp.SendAsync(email);
+            }
+            finally
+            {
+                await smtp.DisconnectAsync(true);
+            }
         }
 
         public async Task SendOtpEmailAsync(string toEmail, string otp)

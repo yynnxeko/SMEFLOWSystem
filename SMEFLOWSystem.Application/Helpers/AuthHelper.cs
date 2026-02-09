@@ -66,7 +66,7 @@ namespace SMEFLOWSystem.Application.Helpers
         }
         public static string GenerateOrderNumber()
         {
-            return $"SUB-{DateTime.Now.Ticks.ToString().Substring(10)}";
+            return $"SUB-{DateTime.UtcNow.Ticks.ToString().Substring(10)}";
         }
     }
 }

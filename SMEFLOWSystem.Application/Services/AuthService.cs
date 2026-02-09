@@ -1,29 +1,32 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Hangfire;
+using Microsoft.Extensions.Configuration;
 using ShareKernel.Common.Enum;
 using SMEFLOWSystem.Application.DTOs.AuthDtos;
 using SMEFLOWSystem.Application.Helpers;
 using SMEFLOWSystem.Application.Interfaces.IRepositories;
+using SMEFLOWSystem.Application.Interfaces.IServices;
 using SMEFLOWSystem.Core.Entities;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SMEFLOWSystem.Application.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly ITenantRepository _tenantRepo;
         private readonly IUserRepository _userRepo;
         private readonly IRoleRepository _roleRepo;
         private readonly IUserRoleRepository _userRoleRepo;
-        private readonly IOrderRepository _orderRepo;
         private readonly ICustomerRepository _customerRepo;
-        private readonly ISubscriptionPlanRepository _planRepo;
         private readonly ITransaction _transaction;
         private readonly IConfiguration _config;
+        private readonly IOrderService _orderService;
+        private readonly IBillingService _billingService;
 
         // Constructor Injection
         public AuthService(
@@ -31,40 +34,40 @@ namespace SMEFLOWSystem.Application.Services
             IUserRepository userRepo,
             IRoleRepository roleRepo,
             IUserRoleRepository userRoleRepo,
-            IOrderRepository orderRepo,
             ICustomerRepository customerRepo,
-            ISubscriptionPlanRepository planRepo,
             ITransaction transaction,
-            IConfiguration config)
+            IConfiguration config,
+            IOrderService orderService,
+            IBillingService billingService)
         {
             _tenantRepo = tenantRepo;
             _userRepo = userRepo;
             _roleRepo = roleRepo;
             _userRoleRepo = userRoleRepo;
-            _orderRepo = orderRepo;
             _customerRepo = customerRepo;
-            _planRepo = planRepo;
             _transaction = transaction;
             _config = config;
+            _orderService = orderService;
+            _billingService = billingService;
         }
 
         public async Task<bool> RegisterTenantAsync(RegisterRequestDto request)
-        {            
+        {
             var existingUser = await _userRepo.GetUserByEmailAsync(request.AdminEmail);
-            if(existingUser != null)
+            if (existingUser != null)
                 throw new Exception("Email này đã được sử dụng!");
 
-
-            // Bao bọc toàn bộ quy trình trong Transaction
+            Guid createdOrderId = Guid.Empty;
+            string adminEmail = request.AdminEmail;
+            string companyName = request.CompanyName;
             await _transaction.ExecuteAsync(async () =>
             {
-                // BƯỚC 1: TẠO TENANT (CÔNG TY)
-                // ---------------------------------------------------
+                // TẠO TENANT (CÔNG TY)
                 var newTenant = new Tenant
                 {
                     Id = Guid.NewGuid(),
                     Name = request.CompanyName,
-                    Status = StatusEnum.TenantPending, 
+                    Status = StatusEnum.TenantPending,
                     SubscriptionPlanId = request.SubscriptionPlanId,
                     CreatedAt = DateTime.UtcNow,
                 };
@@ -72,8 +75,7 @@ namespace SMEFLOWSystem.Application.Services
                 await _tenantRepo.AddAsync(newTenant);
 
 
-                // BƯỚC 2: TẠO USER ADMIN CHO TENANT ĐÓ
-                // ---------------------------------------------------
+                // TẠO USER ADMIN CHO TENANT ĐÓ
                 var adminUser = new User
                 {
                     Id = Guid.NewGuid(),
@@ -83,24 +85,19 @@ namespace SMEFLOWSystem.Application.Services
                     Phone = request.PhoneNumber ?? string.Empty,
                     PasswordHash = AuthHelper.HashPassword(request.Password),
                     IsActive = true,
-                    IsVerified = false, // Cần confirm email sau
+                    IsVerified = false,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _userRepo.AddAsync(adminUser);
 
 
-                // BƯỚC 3: UPDATE OWNER CHO TENANT
-                // ---------------------------------------------------
-                // Gán User vừa tạo làm chủ sở hữu (Owner) của Tenant
+                // UPDATE OWNER CHO TENANT
                 newTenant.OwnerUserId = adminUser.Id;
                 await _tenantRepo.UpdateAsync(newTenant);
 
 
-                // BƯỚC 4: GÁN QUYỀN (ROLE) ADMIN CHO USER
-                // ---------------------------------------------------
-                // Lấy Role "TenantAdmin" từ hệ thống (giả sử tên Role là cố định)
-                // Lưu ý: Role này là System Role (TenantId = null)
+                // GÁN QUYỀN (ROLE) ADMIN CHO USER
                 var adminRole = await _roleRepo.GetRoleByNameAsync("TenantAdmin");
 
                 if (adminRole == null)
@@ -115,46 +112,31 @@ namespace SMEFLOWSystem.Application.Services
                 await _userRoleRepo.AddUserRoleAsync(userRole);
 
 
-                // BƯỚC 5: TẠO KHÁCH HÀNG ĐẠI DIỆN (INTERNAL CUSTOMER)
-                // ---------------------------------------------------
-                // Để tạo Order, cần có CustomerId. Ta tạo một Customer nội bộ đại diện cho chính Tenant này.
+                // TẠO KHÁCH HÀNG ĐẠI DIỆN (INTERNAL CUSTOMER)
                 var internalCustomer = new Customer
                 {
                     Id = Guid.NewGuid(),
                     TenantId = newTenant.Id,
-                    Name = request.CompanyName, 
+                    Name = request.CompanyName,
                     Email = request.AdminEmail,
-                    Type = "Internal", 
+                    Type = "Internal",
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _customerRepo.AddAsync(internalCustomer);
 
-
-                // BƯỚC 6: TẠO ĐƠN HÀNG THANH TOÁN (ORDER)
-                // ---------------------------------------------------
-                // Lấy thông tin gói dịch vụ để tính tiền
-                var plan = await _planRepo.GetByIdAsync(request.SubscriptionPlanId);
-                if (plan == null) throw new Exception("Gói dịch vụ không tồn tại!");
-
-                var newOrder = new Order
-                {
-                    Id = Guid.NewGuid(),
-                    TenantId = newTenant.Id,
-                    CustomerId = internalCustomer.Id,
-                    OrderNumber = AuthHelper.GenerateOrderNumber(), 
-                    OrderDate = DateTime.UtcNow,
-                    Status = StatusEnum.OrderPending,       
-                    PaymentStatus = StatusEnum.PaymentPending, 
-                    TotalAmount = plan.Price,
-                    DiscountAmount = 0,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _orderRepo.AddAsync(newOrder);
-
-                // KẾT THÚC TRANSACTION: Mọi thứ sẽ được Commit tự động nếu không có Exception
+                // TẠO ĐƠN HÀNG THANH TOÁN (ORDER)
+                var newOrder = await _orderService.CreateSubscriptionOrderAsync(
+                    newTenant.Id,
+                    internalCustomer.Id,
+                    request.SubscriptionPlanId);
+                createdOrderId = newOrder.Id;
             });
+
+            if (createdOrderId != Guid.Empty)
+            {
+                await _billingService.EnqueuePaymentLinkEmailAsync(createdOrderId, adminEmail, companyName);
+            }
 
             return true;
         }

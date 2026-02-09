@@ -15,6 +15,8 @@ public partial class SubscriptionPlan
 
     public decimal Price { get; set; }
 
+    public int DurationMonths { get; set; }
+
     public int MaxUsers { get; set; }
 
     public string Description { get; set; }

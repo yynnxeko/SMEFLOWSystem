@@ -122,6 +122,33 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
 
         }
 
+        public async Task<User?> GetByIdIgnoreTenantAsync(Guid id)
+        {
+            return await _context.Users
+                .IgnoreQueryFilters()
+                .Include(x => x.Tenant)
+                .Include(x => x.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Include(x => x.Employees)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<User?> UpdateUserIgnoreTenantAsync(User user)
+        {
+            var existingUser = await _context.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == user.Id);
+            if (existingUser == null) return null;
+
+            existingUser.FullName = user.FullName;
+            existingUser.Phone = user.Phone;
+            existingUser.IsActive = user.IsActive;
+            existingUser.IsDeleted = user.IsDeleted;
+
+            await _context.SaveChangesAsync();
+            return existingUser;
+        }
+
         public async Task<bool?> CheckUserIsDeleted(Guid id)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
@@ -163,6 +190,18 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<User> GetOwnerUserByIdAsync(Guid? ownerUserId)
+        {
+            var user = await _context.Users
+                .Include(x => x.Tenant)
+                .Include(x => x.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Include(x => x.Employees)
+                .FirstOrDefaultAsync(u => u.Id == ownerUserId);
+
+            return user!;
         }
     }
 }

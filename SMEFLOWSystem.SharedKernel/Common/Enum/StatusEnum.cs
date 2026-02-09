@@ -17,12 +17,14 @@ namespace ShareKernel.Common.Enum
         public const string OrderPaid = "Paid";
         public const string OrderCancelled = "Cancelled";
         public const string OrderFailed = "Failed";
-
+        public const string OrderCompleted = "Completed";
         // --- Attendance Status ---
         public const string AttendancePresent = "Present";
         public const string AttendanceAbsent = "Absent";
 
         // --- Payment Status ---
-        public const string PaymentPending = "PendingPayment";
+        public const string PaymentPending = "Pending";
+        public const string PaymentPaid = "Paid";
+        public const string PaymentFailed = "Failed";
     }
 }

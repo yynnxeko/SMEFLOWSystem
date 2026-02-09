@@ -10,5 +10,9 @@ namespace SMEFLOWSystem.Application.Interfaces.IRepositories
     public interface IOrderRepository
     {
         Task AddAsync(Order order);
+        Task<Order?> GetByIdAsync(Guid orderId);
+        Task<Order?> GetByIdIgnoreTenantAsync(Guid orderId);
+        Task<Order?> UpdateAsync(Order order);  
+        Task<Order?> UpdateIgnoreTenantAsync(Order order);
     }
 }

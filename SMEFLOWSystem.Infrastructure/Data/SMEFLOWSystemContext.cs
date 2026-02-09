@@ -24,6 +24,7 @@ public partial class SMEFLOWSystemContext : DbContext
     public virtual DbSet<Invite> Invites { get; set; }  // Thêm DbSet cho Invite
     public virtual DbSet<Order> Orders { get; set; }
     public virtual DbSet<OrderItem> OrderItems { get; set; }
+    public virtual DbSet<PaymentTransaction> PaymentTransactions { get; set; }
     public virtual DbSet<Payroll> Payrolls { get; set; }
     public virtual DbSet<Position> Positions { get; set; }
     public virtual DbSet<Role> Roles { get; set; }
@@ -221,6 +222,34 @@ public partial class SMEFLOWSystemContext : DbContext
                 .HasConstraintName("FK_OrderItems_Orders");
         });
 
+        modelBuilder.Entity<PaymentTransaction>(entity =>
+        {
+            entity.HasQueryFilter(e => e.TenantId == currentTenantId);
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.Gateway, e.GatewayTransactionId }).IsUnique();
+            entity.HasIndex(e => e.OrderId);
+
+            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.Gateway)
+                .IsRequired()
+                .HasMaxLength(30);
+            entity.Property(e => e.GatewayTransactionId)
+                .IsRequired()
+                .HasMaxLength(64);
+            entity.Property(e => e.GatewayResponseCode).HasMaxLength(20);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(30);
+            entity.Property(e => e.RawData).HasMaxLength(4000);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne<Order>()
+                .WithMany()
+                .HasForeignKey(e => e.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
         modelBuilder.Entity<Payroll>(entity =>
         {
             entity.HasQueryFilter(e => e.TenantId == currentTenantId);
@@ -291,6 +320,7 @@ public partial class SMEFLOWSystemContext : DbContext
             entity.Property(e => e.DisplayName)
                 .IsRequired()
                 .HasMaxLength(150);
+            entity.Property(e => e.DurationMonths).HasDefaultValue(1);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Name)
                 .IsRequired()

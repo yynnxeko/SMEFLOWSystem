@@ -10,5 +10,6 @@ namespace SMEFLOWSystem.Application.Interfaces.IServices
     public interface IAuthService
     {
         Task<bool> RegisterTenantAsync(RegisterRequestDto request);
+        Task<string> LoginAsync(LoginRequestDto request);
     }
 }
