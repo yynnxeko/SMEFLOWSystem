@@ -8233,14 +8233,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj": {
-              "projectPath": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj"
+            "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj": {
+              "projectPath": "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj"
             },
             "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj": {
               "projectPath": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Infrastructure\\SMEFLOWSystem.Infrastructure.csproj"
             },
-            "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj": {
-              "projectPath": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj"
+            "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj": {
+              "projectPath": "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj"
             }
           }
         }

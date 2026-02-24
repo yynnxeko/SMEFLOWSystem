@@ -4,6 +4,9 @@ using SMEFLOWSystem.WebAPI.Middleware;
 using Hangfire;
 using Hangfire.Common;
 using SMEFLOWSystem.Application.BackgroundJobs;
+using Microsoft.EntityFrameworkCore;
+using SMEFLOWSystem.Core.Entities;
+using SMEFLOWSystem.Infrastructure.Data;
 
 namespace SMEFLOWSystem.WebAPI.Validator;
 
@@ -24,12 +27,40 @@ public static class WebApplicationExtensions
 
         app.UseMiddleware<ModuleAccessMiddleware>();
 
+        SeedRoles(app);
+
         // Schedule recurring jobs (daily at 00:00 Vietnam time)
         ScheduleRecurringJobs(app);
 
         app.MapControllers();
 
         return app;
+    }
+
+    private static void SeedRoles(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<SMEFLOWSystemContext>();
+
+        SeedRoleIfMissing(db, "TenantAdmin", "Tenant Admin");
+        SeedRoleIfMissing(db, "Manager", "Manager");
+        SeedRoleIfMissing(db, "HRManager", "HR Manager");
+        SeedRoleIfMissing(db, "SystemAdmin", "System Admin");
+
+        db.SaveChanges();
+    }
+
+    private static void SeedRoleIfMissing(SMEFLOWSystemContext db, string roleName, string description)
+    {
+        var exists = db.Roles.AsNoTracking().Any(r => r.Name == roleName);
+        if (exists) return;
+
+        db.Roles.Add(new Role
+        {
+            Name = roleName,
+            Description = description,
+            IsSystemRole = true
+        });
     }
 
     private static void ScheduleRecurringJobs(WebApplication app)

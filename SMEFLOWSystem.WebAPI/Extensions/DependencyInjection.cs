@@ -18,6 +18,7 @@ public static class DependencyInjection
     {
         ValidateConfiguration(configuration);
         services.AddDistributedMemoryCache();
+        services.AddMemoryCache();
 
         services.AddControllers();
         services.AddFluentValidationAutoValidation();

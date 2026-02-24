@@ -310,7 +310,7 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<Guid>("DepartmentId")
+                    b.Property<Guid?>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
@@ -334,7 +334,7 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid>("PositionId")
+                    b.Property<Guid?>("PositionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateOnly?>("ResignationDate")
@@ -1050,13 +1050,11 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                     b.HasOne("SMEFLOWSystem.Core.Entities.Department", "Department")
                         .WithMany("Employees")
                         .HasForeignKey("DepartmentId")
-                        .IsRequired()
                         .HasConstraintName("FK_Employees_Departments");
 
                     b.HasOne("SMEFLOWSystem.Core.Entities.Position", "Position")
                         .WithMany("Employees")
                         .HasForeignKey("PositionId")
-                        .IsRequired()
                         .HasConstraintName("FK_Employees_Positions");
 
                     b.HasOne("SMEFLOWSystem.Core.Entities.Tenant", "Tenant")

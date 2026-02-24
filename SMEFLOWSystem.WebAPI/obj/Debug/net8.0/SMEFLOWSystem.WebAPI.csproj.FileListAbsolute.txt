@@ -364,3 +364,4 @@ D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

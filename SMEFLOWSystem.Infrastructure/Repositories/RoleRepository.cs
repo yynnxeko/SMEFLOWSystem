@@ -93,6 +93,16 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public Task<List<Role>> GetByIdsAsync(IEnumerable<int> roleIds)
+        {
+            var ids = roleIds?.Distinct().ToList() ?? new List<int>();
+            if (ids.Count == 0) return Task.FromResult(new List<Role>());
+
+            return _context.Roles
+                .Where(r => ids.Contains(r.Id))
+                .ToListAsync();
+        }
+
         public async Task AddAsync(Role role)
         {
             await _context.Roles.AddAsync(role);

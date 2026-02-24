@@ -11,6 +11,9 @@ namespace SMEFLOWSystem.Application.Interfaces.IRepositories
     {
         Task AddUserRoleAsync(UserRole userRole);
         Task<bool> RemoveUserRoleAsync(Guid userId, int roleId);
+        Task ReplaceUserRolesAsync(Guid userId, Guid tenantId, IEnumerable<int> roleIds);
+
+        Task<bool> AnyUserHasRoleIgnoreTenantAsync(int roleId);
 
     }
 }

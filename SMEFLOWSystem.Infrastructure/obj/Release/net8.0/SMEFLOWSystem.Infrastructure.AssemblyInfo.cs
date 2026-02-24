@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SMEFLOWSystem.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c6057c5f8e4b0b0509c2f9874b6464156b571df2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e8412c7252a244c31386de5bfa57bd888a67f5c7")]
 [assembly: System.Reflection.AssemblyProductAttribute("SMEFLOWSystem.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SMEFLOWSystem.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

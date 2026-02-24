@@ -65,6 +65,7 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
                 .IgnoreQueryFilters()
                 .Include(x => x.Tenant)
                 .Include(x => x.UserRoles)
+                    .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
@@ -90,8 +91,17 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
 
         public async Task<bool> IsEmailExistAsync(string email)
         {
-            var existUser = await _context.Users.AnyAsync(u => u.Email == email);
-            return existUser;
+            var normalized = NormalizeEmail(email);
+            if (string.IsNullOrEmpty(normalized)) return false;
+
+            return await _context.Users
+                .IgnoreQueryFilters()
+                .AnyAsync(u => u.Email != null && u.Email.ToLower() == normalized);
+        }
+
+        private static string NormalizeEmail(string email)
+        {
+            return (email ?? string.Empty).Trim().ToLowerInvariant();
         }
 
         public async Task<User?> UpdatePasswordAsync(Guid id, string password)

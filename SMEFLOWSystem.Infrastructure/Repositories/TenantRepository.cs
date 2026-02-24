@@ -79,6 +79,14 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public Task<List<Tenant>> GetAllIgnoreTenantAsync()
+        {
+            return _context.Tenants
+                .IgnoreQueryFilters()
+                .Where(t => !t.IsDeleted)
+                .ToListAsync();
+        }
+
         public async Task<Tenant?> GetByOwnerUserIdIgnoreAsync(Guid ownerId)
         {
             return await _context.Tenants

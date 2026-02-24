@@ -4,8 +4,12 @@ using SMEFLOWSystem.Application.Interfaces.IRepositories;
 using SMEFLOWSystem.Application.Interfaces.IServices;
 using SMEFLOWSystem.Application.Mappings;
 using SMEFLOWSystem.Application.Services;
+using SMEFLOWSystem.Application.Services.System;
 using SMEFLOWSystem.Application.BackgroundJobs;
 using SMEFLOWSystem.Application.Validation.AuthValidation;
+using SMEFLOWSystem.Application.Validation.HRValidation;
+using Microsoft.Extensions.Configuration;
+using SMEFLOWSystem.Application.Interfaces.IServices.System;
 
 namespace SMEFLOWSystem.Application.Extensions;
 
@@ -21,6 +25,8 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining<LoginRequestDtoValidator>();
         services.AddValidatorsFromAssemblyContaining<ResetPasswordWithOtpDtoValidator>();
 
+        services.AddValidatorsFromAssemblyContaining<DepartmentCreateDtoValidator>();
+
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
@@ -34,6 +40,13 @@ public static class DependencyInjection
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<TenantExpirationRecurringJob>();
         services.AddScoped<IOTPService, OTPService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+
+        services.AddScoped<IHrDepartmentService, HrDepartmentService>();
+        services.AddScoped<IHrPositionService, HrPositionService>();
+        services.AddScoped<IHrEmployeeService, HrEmployeeService>();
+
+        services.AddScoped<ISystemBootstrapService, SystemBootstrapService>();
 
         return services;
     }

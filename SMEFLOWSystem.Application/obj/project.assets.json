@@ -3253,11 +3253,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj",
+      "projectUniqueName": "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj",
       "projectName": "SMEFLOWSystem.Application",
-      "projectPath": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj",
+      "projectPath": "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\SMEFLOWSystem.Application.csproj",
       "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-      "outputPath": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\obj\\",
+      "outputPath": "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3279,11 +3279,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Core\\SMEFLOWSystem.Core.csproj": {
-              "projectPath": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Core\\SMEFLOWSystem.Core.csproj"
+            "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Core\\SMEFLOWSystem.Core.csproj": {
+              "projectPath": "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.Core\\SMEFLOWSystem.Core.csproj"
             },
-            "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj": {
-              "projectPath": "D:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj"
+            "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj": {
+              "projectPath": "d:\\Project\\ProjectMonHoc\\EXE101\\DodoSystem-BE\\SMEFLOWSystem.SharedKernel\\SMEFLOWSystem.SharedKernel.csproj"
             }
           }
         }

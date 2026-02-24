@@ -29,7 +29,14 @@ public static class DependencyInjection
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
 
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
         services.AddScoped<ICurrentTenantService, CurrentTenantService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ITransaction, Transaction>();
 
         return services;

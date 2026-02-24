@@ -2,6 +2,8 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SMEFLOWSystem.Core.Entities;
 using SMEFLOWSystem.SharedKernel.Interfaces;
@@ -33,6 +35,7 @@ public partial class SMEFLOWSystemContext : DbContext
     public virtual DbSet<PaymentTransaction> PaymentTransactions { get; set; }
     public virtual DbSet<Payroll> Payrolls { get; set; }
     public virtual DbSet<Position> Positions { get; set; }
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<Role> Roles { get; set; }
     public virtual DbSet<Tenant> Tenants { get; set; }
     public virtual DbSet<User> Users { get; set; }
@@ -135,6 +138,40 @@ public partial class SMEFLOWSystemContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Employees)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Employees_Users");
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasQueryFilter(e => e.TenantId == _currentTenantId);
+            entity.HasKey(e => e.Id).HasName("PK__RefreshToken__3214EC07");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+            entity.Property(e => e.TokenHash)
+                .IsRequired()
+                .HasMaxLength(128);
+
+            entity.Property(e => e.RevokeReason)
+                .HasMaxLength(255);
+
+            entity.HasIndex(e => new { e.TenantId, e.UserId }, "IX_RefreshTokens_Tenant_User");
+            entity.HasIndex(e => new { e.TenantId, e.TokenHash }, "UQ_RefreshTokens_Tenant_TokenHash").IsUnique();
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_RefreshTokens_Users");
+
+            entity.HasOne(d => d.Tenant).WithMany()
+                .HasForeignKey(d => d.TenantId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RefreshTokens_Tenants");
+
+            entity.HasOne(d => d.ReplacedByToken).WithMany()
+                .HasForeignKey(d => d.ReplacedByTokenId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_RefreshTokens_ReplacedBy");
         });
 
         modelBuilder.Entity<Invite>(entity =>
@@ -464,8 +501,73 @@ public partial class SMEFLOWSystemContext : DbContext
                 .HasConstraintName("FK_UserRoles_Users");
         });
 
+        ApplySoftDeleteQueryFilters(modelBuilder);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SMEFLOWSystemContext).Assembly);
         base.OnModelCreating(modelBuilder);
+    }
+
+    private static void ApplySoftDeleteQueryFilters(ModelBuilder modelBuilder)
+    {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            var isDeletedProp = entityType.FindProperty("IsDeleted");
+            if (isDeletedProp == null) continue;
+
+            var parameter = Expression.Parameter(entityType.ClrType, "e");
+
+            Expression isNotDeleted;
+            if (isDeletedProp.ClrType == typeof(bool))
+            {
+                var efProperty = Expression.Call(
+                    typeof(EF),
+                    nameof(EF.Property),
+                    new[] { typeof(bool) },
+                    parameter,
+                    Expression.Constant("IsDeleted"));
+                isNotDeleted = Expression.Equal(efProperty, Expression.Constant(false));
+            }
+            else
+            {
+                var efProperty = Expression.Call(
+                    typeof(EF),
+                    nameof(EF.Property),
+                    new[] { typeof(bool?) },
+                    parameter,
+                    Expression.Constant("IsDeleted"));
+                isNotDeleted = Expression.NotEqual(efProperty, Expression.Constant(true, typeof(bool?)));
+            }
+
+            var existingFilter = entityType.GetQueryFilter();
+            if (existingFilter == null)
+            {
+                entityType.SetQueryFilter(Expression.Lambda(isNotDeleted, parameter));
+                continue;
+            }
+
+            var existingBody = new ReplaceExpressionVisitor(existingFilter.Parameters.Single(), parameter)
+                .Visit(existingFilter.Body);
+            var combinedBody = Expression.AndAlso(existingBody!, isNotDeleted);
+            entityType.SetQueryFilter(Expression.Lambda(combinedBody, parameter));
+        }
+    }
+
+    private sealed class ReplaceExpressionVisitor : ExpressionVisitor
+    {
+        private readonly Expression _oldValue;
+        private readonly Expression _newValue;
+
+        public ReplaceExpressionVisitor(Expression oldValue, Expression newValue)
+        {
+            _oldValue = oldValue;
+            _newValue = newValue;
+        }
+
+        public override Expression? Visit(Expression? node)
+        {
+            if (node == _oldValue) return _newValue;
+            return base.Visit(node);
+        }
     }
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

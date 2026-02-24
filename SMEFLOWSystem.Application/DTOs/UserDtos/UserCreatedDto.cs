@@ -16,6 +16,8 @@ namespace SMEFLOWSystem.Application.DTOs.UserDtos
 
         public string Phone { get; set; } = string.Empty;
 
+        public int RoleId { get; set; } 
+
         public bool IsActive { get; set; }
         public bool IsVerified { get; set; }
     }

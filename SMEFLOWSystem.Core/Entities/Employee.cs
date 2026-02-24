@@ -14,9 +14,9 @@ public partial class Employee : ITenantEntity
 
     public Guid? UserId { get; set; }
 
-    public Guid DepartmentId { get; set; }
+    public Guid? DepartmentId { get; set; }
 
-    public Guid PositionId { get; set; }
+    public Guid? PositionId { get; set; }
 
     public string FullName { get; set; }
 
