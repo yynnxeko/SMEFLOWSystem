@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36811.4
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMEFLOWSystem.Application", "SMEFLOWSystem.Application\SMEFLOWSystem.Application.csproj", "{CBA16A19-793E-47BF-9FFF-FBADBFD30CE7}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMEFLOWSystem.SharedKernel", "SMEFLOWSystem.SharedKernel\SMEFLOWSystem.SharedKernel.csproj", "{B5E0BC80-C84A-44F2-BAEC-85AD0668650A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMEFLOWSystem.WebAPI", "SMEFLOWSystem.WebAPI\SMEFLOWSystem.WebAPI.csproj", "{02A3FD47-98B9-4E54-9C26-C2C794BBE07A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VNPAY.NET", "VNPAY.NET\VNPAY.NET.csproj", "{EF59F997-6F1C-4B7A-84CF-A1FF18B4418B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{02A3FD47-98B9-4E54-9C26-C2C794BBE07A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02A3FD47-98B9-4E54-9C26-C2C794BBE07A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02A3FD47-98B9-4E54-9C26-C2C794BBE07A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF59F997-6F1C-4B7A-84CF-A1FF18B4418B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF59F997-6F1C-4B7A-84CF-A1FF18B4418B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF59F997-6F1C-4B7A-84CF-A1FF18B4418B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF59F997-6F1C-4B7A-84CF-A1FF18B4418B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SMEFLOWSystem.Application.DTOs.Payment;
+using Microsoft.AspNetCore.Hosting;
 using SMEFLOWSystem.Application.Interfaces.IServices;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace SMEFLOWSystem.WebAPI.Controllers
 {
@@ -11,11 +12,16 @@ namespace SMEFLOWSystem.WebAPI.Controllers
     {
         private readonly IBillingService _billingService;
         private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _env;
 
-        public PaymentController(IBillingService billingService, IConfiguration config)
+        public PaymentController(
+            IBillingService billingService,
+            IConfiguration config,
+            IWebHostEnvironment env)
         {
             _billingService = billingService;
             _config = config;
+            _env = env;
         }
 
         [HttpPost("create")]
@@ -34,33 +40,41 @@ namespace SMEFLOWSystem.WebAPI.Controllers
         }
 
         [HttpGet("callback/vnpay")]  
-        public async Task<IActionResult> VNPayCallback([FromQuery] string? vnp_ResponseCode, [FromQuery] string? vnp_TxnRef)
+        public async Task<IActionResult> VNPayCallback([FromQuery] string? vnp_TxnRef)
         {
+            var frontendUrl = _config["Payment:FrontendUrl"] ?? "http://localhost:3000";
             try
             {
-                var processed = await _billingService.ProcessVNPayCallbackAsync(Request.Query);
+                var status = await _billingService.ProcessVNPayCallbackAsync(Request.Query);
 
-                // TODO: Thay đổi URL này thành frontend URL thực của bạn
-                var frontendUrl = _config["Payment:FrontendUrl"] ?? "http://localhost:3000";
-
-                if (!processed)
+                if (status == null)
                 {
                     return Redirect($"{frontendUrl}/payment/error");
                 }
 
-                var isSuccess = vnp_ResponseCode == "00";
-                var orderId = vnp_TxnRef;
-                
-                return Redirect(isSuccess
-                    ? $"{frontendUrl}/payment/success?orderId={orderId}"
-                    : $"{frontendUrl}/payment/failed?orderId={orderId}");
+                return Redirect(status == "Success"
+                    ? $"{frontendUrl}/payment/success?orderId={vnp_TxnRef}"
+                    : $"{frontendUrl}/payment/failed?orderId={vnp_TxnRef}");
             }
             catch (Exception ex)
             {
-                // Log error nếu cần: _logger.LogError(ex, "VNPay callback failed");
-                var frontendUrl = _config["Payment:FrontendUrl"] ?? "http://localhost:3000";
                 return Redirect($"{frontendUrl}/payment/error");
             }
+        }
+
+        /// <summary>
+        /// Development-only: simulate a successful VNPay callback for an existing order.
+        /// This builds a callback query string with a valid signature and redirects into the normal callback endpoint.
+        /// </summary>
+        [HttpPost("simulate/vnpay/success")]
+        public async Task<IActionResult> SimulateVNPaySuccess([FromQuery] Guid orderId, [FromQuery] string? vnp_TransactionNo = null)
+        {
+            if (!_env.IsDevelopment())
+                return NotFound();
+
+            var queryString = await _billingService.BuildSimulatedVNPaySuccessQueryStringAsync(orderId, vnp_TransactionNo);
+            var callbackUrl = $"{Request.Scheme}://{Request.Host}/api/payment/callback/vnpay?{queryString}";
+            return Redirect(callbackUrl);
         }
     }
 }

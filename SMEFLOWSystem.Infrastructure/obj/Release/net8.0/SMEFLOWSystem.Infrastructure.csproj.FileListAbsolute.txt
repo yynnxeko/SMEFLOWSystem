@@ -20,3 +20,5 @@ d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Infrastructure\obj\R
 d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Infrastructure\obj\Release\net8.0\SMEFLOWSystem.Infrastructure.pdb
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Infrastructure\obj\Release\net8.0\SMEFLOWSystem.Infrastructure.genruntimeconfig.cache
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Infrastructure\obj\Release\net8.0\ref\SMEFLOWSystem.Infrastructure.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Infrastructure\bin\Release\net8.0\VNPAY.NET.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Infrastructure\bin\Release\net8.0\VNPAY.NET.pdb

@@ -10,6 +10,7 @@ using SMEFLOWSystem.Application.Validation.AuthValidation;
 using SMEFLOWSystem.Application.Validation.HRValidation;
 using Microsoft.Extensions.Configuration;
 using SMEFLOWSystem.Application.Interfaces.IServices.System;
+using VNPAY.NET;
 
 namespace SMEFLOWSystem.Application.Extensions;
 
@@ -42,11 +43,15 @@ public static class DependencyInjection
         services.AddScoped<IOTPService, OTPService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
+        // VNPay gateway client
+        services.AddTransient<IVnpay, Vnpay>();
+
         services.AddScoped<IHrDepartmentService, HrDepartmentService>();
         services.AddScoped<IHrPositionService, HrPositionService>();
         services.AddScoped<IHrEmployeeService, HrEmployeeService>();
 
         services.AddScoped<ISystemBootstrapService, SystemBootstrapService>();
+        services.AddScoped<ISystemTenantService, SystemTenantService>();
 
         return services;
     }

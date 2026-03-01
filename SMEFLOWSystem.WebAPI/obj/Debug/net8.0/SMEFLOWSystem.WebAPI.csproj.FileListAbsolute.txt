@@ -193,6 +193,9 @@ D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\Azure.Core.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\Azure.Identity.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\Hangfire.AspNetCore.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\Hangfire.Core.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\Hangfire.NetCore.dll
@@ -355,13 +358,12 @@ D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\staticwebassets.development.json
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\swae.build.ex.cache
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\SMEFLOWS.760AFD7B.Up2Date
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\SMEFLOWSystem.WebAPI.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\refint\SMEFLOWSystem.WebAPI.dll
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\SMEFLOWSystem.WebAPI.pdb
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\SMEFLOWSystem.WebAPI.genruntimeconfig.cache
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\ref\SMEFLOWSystem.WebAPI.dll
-D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.dll
-D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
-D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
-D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\VNPAY.NET.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Debug\net8.0\VNPAY.NET.pdb

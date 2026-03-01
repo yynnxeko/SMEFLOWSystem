@@ -18,5 +18,7 @@ namespace SMEFLOWSystem.Application.Interfaces.IRepositories
         Task<List<Tenant>> GetExpiredTenantsIgnoreTenantAsync(DateOnly todayUtc);
         Task<List<Tenant>> GetAllIgnoreTenantAsync();
         Task<Tenant?> GetByOwnerUserIdIgnoreAsync(Guid ownerId);
+
+        Task<(List<Tenant> Items, int TotalCount)> GetPagedIgnoreTenantAsync(int pageNumber, int pageSize);
     }
 }

@@ -399,7 +399,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "SMEFLOWSystem.WebAPI.Controllers.Hr.HrInviteCompleteRequest",
+        "Type": "SMEFLOWSystem.Application.DTOs.HRDtos.HrInviteCompleteRequestDto",
         "IsRequired": true
       }
     ],
@@ -407,7 +407,7 @@
   },
   {
     "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.Hr.HrInvitesController",
-    "Method": "Send",
+    "Method": "SendInvite",
     "RelativePath": "api/hr/invites/send",
     "HttpMethod": "POST",
     "IsController": true,
@@ -415,7 +415,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "SMEFLOWSystem.WebAPI.Controllers.Hr.HrInviteSendRequest",
+        "Type": "SMEFLOWSystem.Application.DTOs.HRDtos.HrInviteSendRequestDto",
         "IsRequired": true
       }
     ],
@@ -683,11 +683,6 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "vnp_ResponseCode",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
         "Name": "vnp_TxnRef",
         "Type": "System.String",
         "IsRequired": false
@@ -707,6 +702,89 @@
         "Name": "orderId",
         "Type": "System.Guid",
         "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.PaymentController",
+    "Method": "SimulateVNPaySuccess",
+    "RelativePath": "api/Payment/simulate/vnpay/success",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.Guid",
+        "IsRequired": false
+      },
+      {
+        "Name": "vnp_TransactionNo",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.RefreshTokenController",
+    "Method": "GetAllTokenByUserId",
+    "RelativePath": "api/refresh-tokens/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.RefreshTokenController",
+    "Method": "Issue",
+    "RelativePath": "api/refresh-tokens/issue",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.RefreshTokenController",
+    "Method": "Logout",
+    "RelativePath": "api/refresh-tokens/logout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.RefreshTokenController",
+    "Method": "GetAllTokenByMe",
+    "RelativePath": "api/refresh-tokens/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SMEFLOWSystem.WebAPI.Controllers.RefreshTokenController",
+    "Method": "Refresh",
+    "RelativePath": "api/refresh-tokens/refresh",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "SMEFLOWSystem.Application.DTOs.RefreshTokenDtos.RefreshRequestDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []

@@ -45,4 +45,10 @@ public class ModuleRepository : IModuleRepository
         var normalized = code.Trim();
         return _context.Modules.FirstOrDefaultAsync(m => m.Code == normalized && m.IsActive);
     }
+
+    public async Task<Module> UpdateAsync(Module module)
+    {
+        _context.Modules.Update(module);
+        return await _context.SaveChangesAsync().ContinueWith(_ => module);
+    }
 }

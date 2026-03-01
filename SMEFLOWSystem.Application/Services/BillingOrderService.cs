@@ -81,6 +81,7 @@ public class BillingOrderService : IBillingOrderService
             PaymentStatus = StatusEnum.PaymentPending,
             TotalAmount = total,
             DiscountAmount = discountDecimal,
+            FinalAmount = total - discountDecimal,
             Notes = isTrialOrder
                 ? "TRIAL"
                 : (prorateUntilUtc.HasValue ? $"PRORATE_UNTIL:{prorateUntilUtc.Value:yyyy-MM-dd}" : null),

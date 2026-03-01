@@ -61,12 +61,24 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
 
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            return await _context.Users
+            var user = await _context.Users
                 .IgnoreQueryFilters()
                 .Include(x => x.Tenant)
-                .Include(x => x.UserRoles)
-                    .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user != null)
+            {
+                // Load UserRoles separately with IgnoreQueryFilters
+                var userRoles = await _context.UserRoles
+                    .IgnoreQueryFilters()
+                    .Where(ur => ur.UserId == user.Id)
+                    .Include(ur => ur.Role)
+                    .ToListAsync();
+
+                user.UserRoles = userRoles;
+            }
+
+            return user;
         }
 
         public async Task<User?> GetUserByIdAsync(Guid id)
@@ -149,13 +161,25 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
 
         public async Task<User?> GetByIdIgnoreTenantAsync(Guid id)
         {
-            return await _context.Users
+            var user = await _context.Users
                 .IgnoreQueryFilters()
                 .Include(x => x.Tenant)
-                .Include(x => x.UserRoles)
-                    .ThenInclude(ur => ur.Role)
                 .Include(x => x.Employees)
                 .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user != null)
+            {
+                // Load UserRoles separately with IgnoreQueryFilters
+                var userRoles = await _context.UserRoles
+                    .IgnoreQueryFilters()
+                    .Where(ur => ur.UserId == user.Id)
+                    .Include(ur => ur.Role)
+                    .ToListAsync();
+
+                user.UserRoles = userRoles;
+            }
+
+            return user;
         }
 
         public async Task<User?> UpdateUserIgnoreTenantAsync(User user)

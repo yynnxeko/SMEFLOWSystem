@@ -1,34 +1,19 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SMEFLOWSystem.Application.DTOs.HRDtos;
 using SMEFLOWSystem.Application.Interfaces.IServices;
+using SMEFLOWSystem.SharedKernel.Interfaces;
 
 namespace SMEFLOWSystem.WebAPI.Controllers.Hr;
-
-public class HrInviteSendRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public int RoleId { get; set; }
-    public Guid? DepartmentId { get; set; }
-    public Guid? PositionId { get; set; }
-    public string Message { get; set; } = string.Empty;
-}
-
-public class HrInviteCompleteRequest
-{
-    public string Token { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string? Phone { get; set; }
-}
 
 [ApiController]
 [Route("api/hr/invites")]
 public class HrInvitesController : ControllerBase
 {
     private readonly IInviteService _inviteService;
-    private readonly SMEFLOWSystem.SharedKernel.Interfaces.ICurrentTenantService _currentTenant;
+    private readonly ICurrentTenantService _currentTenant;
 
-    public HrInvitesController(IInviteService inviteService, SMEFLOWSystem.SharedKernel.Interfaces.ICurrentTenantService currentTenant)
+    public HrInvitesController(IInviteService inviteService, ICurrentTenantService currentTenant)
     {
         _inviteService = inviteService;
         _currentTenant = currentTenant;
@@ -36,7 +21,7 @@ public class HrInvitesController : ControllerBase
 
     [Authorize]
     [HttpPost("send")]
-    public async Task<IActionResult> Send([FromBody] HrInviteSendRequest request)
+    public async Task<IActionResult> SendInvite([FromBody] HrInviteSendRequestDto request)
     {
         var tenantId = _currentTenant.TenantId;
         if (!tenantId.HasValue)
@@ -84,7 +69,7 @@ public class HrInvitesController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("complete")]
-    public async Task<IActionResult> Complete([FromBody] HrInviteCompleteRequest request)
+    public async Task<IActionResult> Complete([FromBody] HrInviteCompleteRequestDto request)
     {
         try
         {

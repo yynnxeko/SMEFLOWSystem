@@ -692,17 +692,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/HrInviteSendRequest"
+                "$ref": "#/components/schemas/HrInviteSendRequestDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/HrInviteSendRequest"
+                "$ref": "#/components/schemas/HrInviteSendRequestDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/HrInviteSendRequest"
+                "$ref": "#/components/schemas/HrInviteSendRequestDto"
               }
             }
           }
@@ -744,17 +744,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/HrInviteCompleteRequest"
+                "$ref": "#/components/schemas/HrInviteCompleteRequestDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/HrInviteCompleteRequest"
+                "$ref": "#/components/schemas/HrInviteCompleteRequestDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/HrInviteCompleteRequest"
+                "$ref": "#/components/schemas/HrInviteCompleteRequestDto"
               }
             }
           }
@@ -1210,19 +1210,131 @@
         ],
         "parameters": [
           {
-            "name": "vnp_ResponseCode",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "vnp_TxnRef",
             "in": "query",
             "schema": {
               "type": "string"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Payment/simulate/vnpay/success": {
+      "post": {
+        "tags": [
+          "Payment"
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "vnp_TransactionNo",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/refresh-tokens/me": {
+      "get": {
+        "tags": [
+          "RefreshToken"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/refresh-tokens/{userId}": {
+      "get": {
+        "tags": [
+          "RefreshToken"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/refresh-tokens/issue": {
+      "post": {
+        "tags": [
+          "RefreshToken"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/refresh-tokens/refresh": {
+      "post": {
+        "tags": [
+          "RefreshToken"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/refresh-tokens/logout": {
+      "post": {
+        "tags": [
+          "RefreshToken"
         ],
         "responses": {
           "200": {
@@ -1835,7 +1947,7 @@
         },
         "additionalProperties": false
       },
-      "HrInviteCompleteRequest": {
+      "HrInviteCompleteRequestDto": {
         "type": "object",
         "properties": {
           "token": {
@@ -1857,7 +1969,7 @@
         },
         "additionalProperties": false
       },
-      "HrInviteSendRequest": {
+      "HrInviteSendRequestDto": {
         "type": "object",
         "properties": {
           "email": {
@@ -2040,6 +2152,16 @@
             "format": "uuid"
           },
           "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RefreshRequestDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
             "type": "string",
             "nullable": true
           }

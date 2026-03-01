@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SMEFLOWSystem.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e8412c7252a244c31386de5bfa57bd888a67f5c7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+352c44fdb3a12cd2869464fb4a4497d70022d5ea")]
 [assembly: System.Reflection.AssemblyProductAttribute("SMEFLOWSystem.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SMEFLOWSystem.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
