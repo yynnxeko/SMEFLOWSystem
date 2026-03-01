@@ -18,6 +18,7 @@ namespace SMEFLOWSystem.Application.Interfaces.IRepositories
         Task<bool> ExistByNameAsync(string name);
         Task<PagedResultDto<Role>> GetAllRolesPagingAsync(PagingRequestDto request);
         Task<List<User>> GetUsersByRoleIdAsync(int roleId);
+        Task<List<Role>> GetByIdsAsync(IEnumerable<int> roleIds);
         Task AddAsync(Role role);
     }
 }

@@ -5,6 +5,7 @@ using SMEFLOWSystem.Application.Interfaces.IServices;
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,14 +39,16 @@ namespace SMEFLOWSystem.Application.Services
         public Task<string> CreatePaymentUrlAsync(Guid orderId, string? clientIp = null)
             => _paymentService.CreatePaymentUrlAsync(orderId, clientIp);
 
-        public Task<bool> ProcessVNPayCallbackAsync(IQueryCollection query)
+        public Task<string?> ProcessVNPayCallbackAsync(IQueryCollection query)
             => _paymentService.ProcessVNPayCallbackAsync(query);
+
+        public Task<string> BuildSimulatedVNPaySuccessQueryStringAsync(Guid orderId, string? gatewayTransactionId = null)
+            => _paymentService.BuildSimulatedVNPaySuccessQueryStringAsync(orderId, gatewayTransactionId);
 
         public async Task EnqueuePaymentLinkEmailAsync(Guid orderId, string adminEmail, string companyName, string? clientIp = null)
         {
             var paymentUrl = await _paymentService.CreatePaymentUrlAsync(orderId, clientIp);
 
-            // Load pricing to show in email (callback/payment may happen without tenant context)
             var order = await _billingOrderRepo.GetByIdIgnoreTenantAsync(orderId);
             if (order == null) throw new Exception("Không tìm thấy đơn thanh toán");
 
@@ -87,8 +90,8 @@ namespace SMEFLOWSystem.Application.Services
                     <p>Cần thanh toán: <b>{payable.ToString("N0", vi)} VND</b></p>
                     <hr/>
                     <p>Nếu bạn muốn thanh toán ngay, vui lòng bấm vào link dưới đây:</p>
-                    <a href='{paymentUrl}' style='padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none;'>THANH TOÁN (TUỲ CHỌN)</a>
-                    <p>Hoặc copy link: {paymentUrl}</p>";
+                    <a href='{WebUtility.HtmlEncode(paymentUrl)}' style='padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none;'>THANH TOÁN (TUỲ CHỌN)</a>
+                    <p>Hoặc copy link: {WebUtility.HtmlEncode(paymentUrl)}</p>";
 
             _backgroundJobClient.Enqueue(() => _emailService.SendEmailAsync(adminEmail, "SMEFLOW - Link thanh toán (tuỳ chọn)", emailBody));
         }

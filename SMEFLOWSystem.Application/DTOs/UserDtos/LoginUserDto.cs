@@ -14,6 +14,8 @@ namespace SMEFLOWSystem.Application.DTOs.UserDtos
         public bool IsDeleted { get; set; }
         public string Token { get; set; } = string.Empty;   
 
+        public string RefreshToken { get; set; } = string.Empty;
+
         public string TenantName { get; set; } = string.Empty;
     }
 }

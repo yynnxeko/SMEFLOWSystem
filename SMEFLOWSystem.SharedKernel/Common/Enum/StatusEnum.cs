@@ -32,5 +32,11 @@ namespace ShareKernel.Common.Enum
         public const string PaymentPending = "Pending";
         public const string PaymentPaid = "Paid";
         public const string PaymentFailed = "Failed";
+
+        // --- Employee Status ---
+        public const string EmployeeWorking = "Working";
+        public const string EmployeeResigned = "Resigned";
+        public const string EmployeeOnLeave = "OnLeave";
+        public const string EmployeeProbation = "Probation";
     }
 }

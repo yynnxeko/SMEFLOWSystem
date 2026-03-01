@@ -310,7 +310,7 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<Guid>("DepartmentId")
+                    b.Property<Guid?>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
@@ -334,7 +334,7 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid>("PositionId")
+                    b.Property<Guid?>("PositionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateOnly?>("ResignationDate")
@@ -831,6 +831,57 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                     b.ToTable("Positions");
                 });
 
+            modelBuilder.Entity("SMEFLOWSystem.Core.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newsequentialid())");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReplacedByTokenId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RevokeReason")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK__RefreshToken__3214EC07");
+
+                    b.HasIndex("ReplacedByTokenId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex(new[] { "TenantId", "UserId" }, "IX_RefreshTokens_Tenant_User");
+
+                    b.HasIndex(new[] { "TenantId", "TokenHash" }, "UQ_RefreshTokens_Tenant_TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("SMEFLOWSystem.Core.Entities.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -1050,13 +1101,11 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                     b.HasOne("SMEFLOWSystem.Core.Entities.Department", "Department")
                         .WithMany("Employees")
                         .HasForeignKey("DepartmentId")
-                        .IsRequired()
                         .HasConstraintName("FK_Employees_Departments");
 
                     b.HasOne("SMEFLOWSystem.Core.Entities.Position", "Position")
                         .WithMany("Employees")
                         .HasForeignKey("PositionId")
-                        .IsRequired()
                         .HasConstraintName("FK_Employees_Positions");
 
                     b.HasOne("SMEFLOWSystem.Core.Entities.Tenant", "Tenant")
@@ -1205,6 +1254,34 @@ namespace SMEFLOWSystem.Infrastructure.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("SMEFLOWSystem.Core.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("SMEFLOWSystem.Core.Entities.RefreshToken", "ReplacedByToken")
+                        .WithMany()
+                        .HasForeignKey("ReplacedByTokenId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_RefreshTokens_ReplacedBy");
+
+                    b.HasOne("SMEFLOWSystem.Core.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .IsRequired()
+                        .HasConstraintName("FK_RefreshTokens_Tenants");
+
+                    b.HasOne("SMEFLOWSystem.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_RefreshTokens_Users");
+
+                    b.Navigation("ReplacedByToken");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SMEFLOWSystem.Core.Entities.Tenant", b =>

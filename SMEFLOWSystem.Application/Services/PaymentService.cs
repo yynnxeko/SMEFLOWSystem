@@ -11,9 +11,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using VNPAY.NET;
+using VNPAY.NET.Enums;
+using VNPAY.NET.Models;
+using VNPAY.NET.Utilities;
 
 namespace SMEFLOWSystem.Application.Services
 {
@@ -32,6 +37,7 @@ namespace SMEFLOWSystem.Application.Services
         private readonly IUserRepository _userRepo;
         private readonly IConfiguration _config;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IVnpay _vnpay;
 
         public PaymentService(
             IBillingOrderRepository billingOrderRepo,
@@ -44,7 +50,8 @@ namespace SMEFLOWSystem.Application.Services
             IBackgroundJobClient backgroundJobClient,
             IConfiguration configuration,
             IUserRepository userRepo,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IVnpay vnpay)
         {
             _billingOrderRepo = billingOrderRepo;
             _tenantRepo = tenantRepo;
@@ -57,108 +64,97 @@ namespace SMEFLOWSystem.Application.Services
             _backgroundJobClient = backgroundJobClient;
             _userRepo = userRepo;
             _httpContextAccessor = httpContextAccessor;
-        }
-
-        private string? TryBuildPublicCallbackUrl(string callbackPath)
-        {
-            var request = _httpContextAccessor.HttpContext?.Request;
-            if (request == null) return null;
-
-            if (string.IsNullOrWhiteSpace(request.Scheme)) return null;
-            if (!request.Host.HasValue) return null;
-
-            return $"{request.Scheme}://{request.Host}{callbackPath}";
+            _vnpay = vnpay;
         }
 
         public async Task<string> CreatePaymentUrlAsync(Guid orderId, string? clientIp = null)
         {
-            // Payment creation may happen without tenant context (e.g., after RegisterTenant) -> bypass tenant filters.
             var billingOrder = await _billingOrderRepo.GetByIdIgnoreTenantAsync(orderId);
             if (billingOrder == null) throw new Exception("Không tìm thấy đơn thanh toán");
 
-            // Avoid generating payment URL for non-pending orders
             if (!string.Equals(billingOrder.PaymentStatus, StatusEnum.PaymentPending, StringComparison.OrdinalIgnoreCase)
                 || !string.Equals(billingOrder.Status, StatusEnum.OrderPending, StringComparison.OrdinalIgnoreCase))
             {
                 throw new Exception("Đơn thanh toán không ở trạng thái chờ thanh toán");
             }
 
-            var mode = _config["Payment:Mode"] ?? throw new Exception("Missing config: Payment:Mode");
-            if (mode == "Sandbox" || mode == "Production")
+            // Lấy IP thực từ HttpContext nếu chưa có (giống reference dùng NetworkHelper)
+            if (string.IsNullOrWhiteSpace(clientIp))
             {
-                var gateway = _config["Payment:Gateway"] ?? throw new Exception("Missing config: Payment:Gateway");
-                if (gateway == "VNPay")
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext != null)
                 {
-                    return await CreateVNPayUrlAsync(billingOrder, clientIp);
+                    try { clientIp = NetworkHelper.GetIpAddress(httpContext); }
+                    catch { clientIp = "127.0.0.1"; }
                 }
-                // Thêm Momo nếu cần sau
+                else
+                {
+                    clientIp = "127.0.0.1";
+                }
             }
-            throw new Exception("Invalid payment mode");
+
+            var gateway = _config["Payment:Gateway"] ?? throw new Exception("Missing config: Payment:Gateway");
+            if (gateway == "VNPay")
+            {
+                return CreateVNPayUrl(billingOrder, clientIp);
+            }
+            throw new Exception($"Unsupported payment gateway: {gateway}");
         }
 
-        public async Task<bool> ProcessVNPayCallbackAsync(IQueryCollection query)
+        public async Task<string?> ProcessVNPayCallbackAsync(IQueryCollection query)
         {
-            // Verify signature từ VNPay callback (query params)
-            var vnpayData = query.ToDictionary(q => q.Key, q => q.Value.ToString());
-            if (!vnpayData.ContainsKey("vnp_SecureHash")) return false;
-
-            var secureHash = vnpayData["vnp_SecureHash"];
-            vnpayData.Remove("vnp_SecureHash");
-            vnpayData.Remove("vnp_SecureHashType");
-
-            var sortedData = vnpayData.OrderBy(k => k.Key).ToDictionary(k => k.Key, v => v.Value);
-            var hashData = BuildVnPayHashData(sortedData);
+            // Initialize VNPAY.NET library for signature verification
+            var tmnCode = _config["Payment:VNPay:TmnCode"] ?? throw new Exception("Missing config: Payment:VNPay:TmnCode");
             var hashSecret = _config["Payment:VNPay:HashSecret"] ?? throw new Exception("Missing config: Payment:VNPay:HashSecret");
-            var checkHash = HmacSha512(hashData, hashSecret);
+            var vnpBaseUrl = _config["Payment:VNPay:BaseUrl"] ?? throw new Exception("Missing config: Payment:VNPay:BaseUrl");
+            var vnpCallbackUrl = _config["Payment:VNPay:CallbackUrl"] ?? string.Empty;
 
-            if (!string.Equals(checkHash, secureHash, StringComparison.OrdinalIgnoreCase))
-                return false;
+            _vnpay.Initialize(tmnCode, hashSecret, vnpBaseUrl, vnpCallbackUrl);
 
-            if (!vnpayData.TryGetValue("vnp_TxnRef", out var txnRef) || string.IsNullOrWhiteSpace(txnRef))
-                throw new Exception("Missing vnp_TxnRef");
-
-            if (!vnpayData.TryGetValue("vnp_ResponseCode", out var responseCode) || string.IsNullOrWhiteSpace(responseCode))
-                throw new Exception("Missing vnp_ResponseCode");
-
-            if (!vnpayData.TryGetValue("vnp_TransactionNo", out var gatewayTransactionId) || string.IsNullOrWhiteSpace(gatewayTransactionId))
-                throw new Exception("Missing vnp_TransactionNo");
-
-            if (!Guid.TryParse(txnRef, out var orderId))
-                return false;
-
-            // Some VNPay flows include vnp_TransactionStatus (00 = success)
-            var isSuccess = string.Equals(responseCode, "00", StringComparison.OrdinalIgnoreCase);
-            if (vnpayData.TryGetValue("vnp_TransactionStatus", out var txnStatus) && !string.IsNullOrWhiteSpace(txnStatus))
+            // Use VNPAY.NET library to verify signature and parse result
+            PaymentResult result;
+            try
             {
-                isSuccess = isSuccess && string.Equals(txnStatus, "00", StringComparison.OrdinalIgnoreCase);
+                result = _vnpay.GetPaymentResult(query);
             }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+
+            if (!Guid.TryParse(result.PaymentId, out var orderId))
+                return null;
+
+            var gatewayTransactionId = result.VnpayTransactionId.ToString();
+            var isSuccess = result.IsSuccess;
             var status = isSuccess ? "Success" : "Failed";
 
-            // Idempotency: if this gateway transaction was already processed, return OK.
-            var existingTx = await _paymentTransactionRepo.GetByGatewayTransactionIdAsync(
-                gateway: GatewayVNPay,
-                gatewayTransactionId: gatewayTransactionId,
-                ignoreTenantFilter: true);
-            if (existingTx != null) return true;
+            // Collect raw data for audit
+            var rawData = query
+                .Where(q => !string.IsNullOrWhiteSpace(q.Key) && q.Key.StartsWith("vnp_", StringComparison.OrdinalIgnoreCase))
+                .ToDictionary(q => q.Key, q => q.Value.ToString());
 
             // Callback has no tenant context -> bypass tenant filters when loading order.
             var orderForTenant = await _billingOrderRepo.GetByIdIgnoreTenantAsync(orderId);
             if (orderForTenant == null) throw new Exception("Không tìm thấy đơn thanh toán");
 
             // Validate merchant code if present
-            if (vnpayData.TryGetValue("vnp_TmnCode", out var tmn) && !string.IsNullOrWhiteSpace(tmn))
+            if (query.ContainsKey("vnp_TmnCode"))
             {
-                var expectedTmn = _config["Payment:VNPay:TmnCode"] ?? throw new Exception("Missing config: Payment:VNPay:TmnCode");
-                if (!string.Equals(tmn, expectedTmn, StringComparison.OrdinalIgnoreCase))
-                    return false;
+                var tmn = query["vnp_TmnCode"].ToString();
+                if (!string.IsNullOrWhiteSpace(tmn) && !string.Equals(tmn, tmnCode, StringComparison.OrdinalIgnoreCase))
+                    return null;
             }
 
-            decimal amount = 0m;
-            long amountMinor = 0;
-            if (vnpayData.TryGetValue("vnp_Amount", out var amountRaw) && long.TryParse(amountRaw, out amountMinor))
-            {
-                amount = amountMinor / 100m;
-            }
+            // Validate amount
+            var amountRaw = query.ContainsKey("vnp_Amount") ? query["vnp_Amount"].ToString() : null;
+            if (string.IsNullOrWhiteSpace(amountRaw))
+                throw new Exception("Missing vnp_Amount");
+
+            if (!long.TryParse(amountRaw, out var amountMinor) || amountMinor <= 0)
+                throw new Exception("Invalid vnp_Amount");
+
+            var amount = amountMinor / 100m;
 
             // Validate amount matches order payable amount
             var discount = orderForTenant.DiscountAmount ?? 0m;
@@ -166,10 +162,11 @@ namespace SMEFLOWSystem.Application.Services
             if (expectedPayable <= 0m)
                 throw new Exception("Đơn thanh toán không hợp lệ (số tiền phải > 0)");
             var expectedMinor = checked((long)decimal.Round(expectedPayable * 100m, 0, MidpointRounding.AwayFromZero));
-            if (amountMinor != 0 && amountMinor != expectedMinor)
+            if (amountMinor != expectedMinor)
                 throw new Exception("Số tiền thanh toán không khớp đơn hàng");
 
             // Process transactionally
+            var shouldEnqueueActivation = false;
             await _transaction.ExecuteAsync(async () =>
             {
                 var existingInside = await _paymentTransactionRepo.GetByGatewayTransactionIdAsync(
@@ -188,23 +185,24 @@ namespace SMEFLOWSystem.Application.Services
                     BillingOrderId = order.Id,
                     Gateway = GatewayVNPay,
                     GatewayTransactionId = gatewayTransactionId,
-                    GatewayResponseCode = responseCode,
+                    GatewayResponseCode = query.ContainsKey("vnp_ResponseCode") ? query["vnp_ResponseCode"].ToString() : "unknown",
                     Amount = amount,
                     Status = status,
-                    RawData = JsonConvert.SerializeObject(vnpayData),
+                    RawData = JsonConvert.SerializeObject(rawData),
                     CreatedAt = DateTime.UtcNow,
                     ProcessedAt = DateTime.UtcNow
                 };
 
                 await _paymentTransactionRepo.AddAsync(paymentTransaction);
 
-                if (status == "Success")
+                if (isSuccess)
                 {
                     if (BillingStateMachine.CanSetPaymentToPaid(order.PaymentStatus)
                         && BillingStateMachine.CanSetOrderToCompleted(order.Status))
                     {
                         order.PaymentStatus = StatusEnum.PaymentPaid;
                         order.Status = StatusEnum.OrderCompleted;
+                        shouldEnqueueActivation = true;
                     }
                 }
                 else
@@ -220,12 +218,54 @@ namespace SMEFLOWSystem.Application.Services
             });
 
             // Nếu thanh toán thành công, dùng Hangfire để active Tenant và Owner (background job để không block callback)
-            if (status == "Success")
+            if (shouldEnqueueActivation)
             {
                 _backgroundJobClient.Enqueue(() => ActivateTenantAfterPaymentAsync(orderId, gatewayTransactionId));
             }
 
-            return true;
+            return status;
+        }
+
+        public async Task<string> BuildSimulatedVNPaySuccessQueryStringAsync(Guid orderId, string? gatewayTransactionId = null)
+        {
+            var order = await _billingOrderRepo.GetByIdIgnoreTenantAsync(orderId);
+            if (order == null) throw new Exception("Không tìm thấy đơn thanh toán");
+
+            var discount = order.DiscountAmount ?? 0m;
+            var payable = order.TotalAmount - discount;
+            if (payable <= 0m)
+                throw new Exception("Đơn thanh toán không hợp lệ (số tiền phải > 0)");
+
+            var expectedMinor = checked((long)decimal.Round(payable * 100m, 0, MidpointRounding.AwayFromZero));
+
+            var tmnCode = _config["Payment:VNPay:TmnCode"] ?? throw new Exception("Missing config: Payment:VNPay:TmnCode");
+            var hashSecret = _config["Payment:VNPay:HashSecret"] ?? throw new Exception("Missing config: Payment:VNPay:HashSecret");
+
+            var vnTime = TimeZoneInfo.ConvertTimeFromUtc(
+                DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            var payDate = vnTime.ToString("yyyyMMddHHmmss");
+
+            var transactionNo = string.IsNullOrWhiteSpace(gatewayTransactionId)
+                ? RandomNumberGenerator.GetInt32(10000000, 99999999).ToString()
+                : gatewayTransactionId.Trim();
+
+            var vnpParams = new SortedDictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["vnp_TmnCode"] = tmnCode,
+                ["vnp_Amount"] = expectedMinor.ToString(CultureInfo.InvariantCulture),
+                ["vnp_TxnRef"] = order.Id.ToString(),
+                ["vnp_ResponseCode"] = "00",
+                ["vnp_TransactionStatus"] = "00",
+                ["vnp_TransactionNo"] = transactionNo,
+                ["vnp_BankCode"] = "NCB",
+                ["vnp_PayDate"] = payDate,
+                ["vnp_OrderInfo"] = $"SIMULATE SUCCESS {order.BillingOrderNumber}",
+            };
+
+            var signData = string.Join("&", vnpParams.Select(kvp => $"{kvp.Key}={WebUtility.UrlEncode(kvp.Value)}"));
+            var secureHash = HmacSha512(signData, hashSecret);
+            return signData + $"&vnp_SecureHash={secureHash}";
         }
 
         // Background job để active Tenant và gửi email (gọi từ Hangfire)
@@ -240,7 +280,6 @@ namespace SMEFLOWSystem.Application.Services
                 var order = await _billingOrderRepo.GetByIdIgnoreTenantAsync(orderId);
                 if (order == null) throw new Exception("Không tìm thấy đơn thanh toán");
 
-                // Double-activation guard: only proceed for paid orders
                 if (!string.Equals(order.PaymentStatus, StatusEnum.PaymentPaid, StringComparison.OrdinalIgnoreCase))
                     return;
 
@@ -249,11 +288,9 @@ namespace SMEFLOWSystem.Application.Services
 
                 tenantName = tenant.Name;
 
-                if (!BillingStateMachine.CanActivateTenant(tenant.Status)
-                    && !string.Equals(tenant.Status, StatusEnum.TenantActive, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
+                var canProceed = string.Equals(tenant.Status, StatusEnum.TenantActive, StringComparison.OrdinalIgnoreCase)
+                                 || BillingStateMachine.CanActivateTenant(tenant.Status);
+                if (!canProceed) return;
 
                 var orderModules = await _billingOrderModuleRepo.GetByBillingOrderIdIgnoreTenantAsync(order.Id);
                 if (orderModules.Count == 0)
@@ -321,77 +358,44 @@ namespace SMEFLOWSystem.Application.Services
             return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
         }
 
-        private static string BuildVnPayHashData(IReadOnlyDictionary<string, string> sortedData)
+        /// <summary>
+        /// Tạo URL thanh toán VNPay — đơn giản, giống reference pattern.
+        /// </summary>
+        private string CreateVNPayUrl(BillingOrder order, string clientIp)
         {
-            // VNPay signature should be computed on URL-encoded key=value pairs joined by '&'
-            // Use Uri.EscapeDataString (spaces => %20) to avoid '+' vs '%20' inconsistencies.
-            return string.Join("&", sortedData.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value ?? string.Empty)}"));
-        }
-
-        private Task<string> CreateVNPayUrlAsync(BillingOrder order, string? clientIp)
-        {
-            // Logic tạo URL VNPay (dựa trên docs sandbox.vnpayment.vn)
-            clientIp = string.IsNullOrWhiteSpace(clientIp) ? "127.0.0.1" : clientIp;
-
             var tmnCode = _config["Payment:VNPay:TmnCode"] ?? throw new Exception("Missing config: Payment:VNPay:TmnCode");
-            var returnUrl = _config["Payment:VNPay:ReturnUrl"];
             var hashSecret = _config["Payment:VNPay:HashSecret"] ?? throw new Exception("Missing config: Payment:VNPay:HashSecret");
-            var paymentBaseUrl = _config["Payment:VNPay:PaymentUrl"] ?? throw new Exception("Missing config: Payment:VNPay:PaymentUrl");
+            var baseUrl = _config["Payment:VNPay:BaseUrl"] ?? throw new Exception("Missing config: Payment:VNPay:BaseUrl");
+            var callbackUrl = _config["Payment:VNPay:CallbackUrl"] ?? throw new Exception("Missing config: Payment:VNPay:CallbackUrl");
 
-            // If ReturnUrl is not configured or still placeholder, try building it from current request host.
-            // This avoids VNPay redirecting to Error.html (e.g. code=70) due to an invalid ReturnUrl.
-            if (string.IsNullOrWhiteSpace(returnUrl)
-                || returnUrl.Contains("your-ngrok-url", StringComparison.OrdinalIgnoreCase)
-                || returnUrl.Contains("your-domain.com", StringComparison.OrdinalIgnoreCase))
-            {
-                returnUrl = TryBuildPublicCallbackUrl("/api/payment/callback/vnpay");
-            }
-
-            if (string.IsNullOrWhiteSpace(returnUrl) || !Uri.TryCreate(returnUrl, UriKind.Absolute, out _))
-            {
-                throw new Exception(
-                    "Invalid VNPay ReturnUrl. Please set Payment:VNPay:ReturnUrl to a public absolute URL (e.g. https://<ngrok-or-domain>/api/payment/callback/vnpay)."
-                );
-            }
+            _vnpay.Initialize(tmnCode, hashSecret, baseUrl, callbackUrl);
 
             var discount = order.DiscountAmount ?? 0m;
             var payable = order.TotalAmount - discount;
             if (payable <= 0m)
                 throw new Exception("Đơn thanh toán không hợp lệ (số tiền phải > 0)");
 
-            var amountMinor = checked((long)decimal.Round(payable * 100m, 0, MidpointRounding.AwayFromZero));
+            var description = $"Thanh toan don {order.BillingOrderNumber}";
+            if (description.Length > 100) description = description[..100];
 
-            var vnpayParams = new Dictionary<string, string>
+            var vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(
+                DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+
+            var request = new PaymentRequest
             {
-                ["vnp_Version"] = "2.1.0",
-                ["vnp_Command"] = "pay",
-                ["vnp_TmnCode"] = tmnCode,
-                ["vnp_Amount"] = amountMinor.ToString(CultureInfo.InvariantCulture), // VND * 100
-                ["vnp_CreateDate"] = DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
-                ["vnp_CurrCode"] = "VND",
-                ["vnp_IpAddr"] = clientIp,
-                ["vnp_Locale"] = "vn",
-                ["vnp_OrderInfo"] = $"Thanh toan don {order.BillingOrderNumber}",
-                ["vnp_OrderType"] = "billpayment",
-                ["vnp_ReturnUrl"] = returnUrl,
-                ["vnp_TxnRef"] = order.Id.ToString() // OrderId làm ref
+                PaymentId = order.Id.ToString(),
+                Money = (double)payable,
+                Description = description,
+                IpAddress = clientIp,
+                BankCode = BankCode.ANY,
+                CreatedDate = vietnamTime,
+                ExpireDate = vietnamTime.AddHours(24),
+                Currency = Currency.VND,
+                Language = DisplayLanguage.Vietnamese
             };
-            // Sort and hash params
-            var sortedParams = vnpayParams.OrderBy(k => k.Key).ToDictionary(k => k.Key, v => v.Value);
-            var hashData = BuildVnPayHashData(sortedParams);
-            var hash = HmacSha512(hashData, hashSecret);
-            
-            // Build URL with proper encoding (hash should NOT be URI escaped)
-            var queryParts = new List<string>();
-            foreach (var kv in sortedParams)
-            {
-                queryParts.Add($"{kv.Key}={Uri.EscapeDataString(kv.Value)}");
-            }
-            // Add hash at the end WITHOUT escaping it
-            queryParts.Add($"vnp_SecureHash={hash}");
-            
-            var paymentUrl = paymentBaseUrl + "?" + string.Join("&", queryParts);
-            return Task.FromResult(paymentUrl);
+
+            return _vnpay.GetPaymentUrl(request);
         }
     }
 }

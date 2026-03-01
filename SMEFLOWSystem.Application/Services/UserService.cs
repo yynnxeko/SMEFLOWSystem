@@ -17,13 +17,22 @@ namespace SMEFLOWSystem.Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
             
 
-        public UserService(IUserRepository userRepository, IMapper mapper, IEmailService emailService)
+        public UserService(
+            IUserRepository userRepository,
+            IRoleRepository roleRepository,
+            IUserRoleRepository userRoleRepository,
+            IMapper mapper,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
+            _userRoleRepository = userRoleRepository;
             _mapper = mapper;
             _emailService = emailService;
         }
@@ -97,12 +106,31 @@ namespace SMEFLOWSystem.Application.Services
             if (userEntity)
                 throw new ArgumentException($"User with email {user.Email} is already existed");
 
+            if (user.RoleId <= 0)
+                throw new ArgumentException("RoleId không hợp lệ");
+
+            var role = await _roleRepository.GetRoleByIdAsync(user.RoleId);
+            if (role == null)
+                throw new ArgumentException("Role không tồn tại");
+
+            if (string.Equals(role.Name, "SystemAdmin", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Không thể gán role SystemAdmin bằng invite tenant");
+
             var newUser = _mapper.Map<User>(user);
             newUser.TenantId = tenantId;
             newUser.PasswordHash = AuthHelper.HashPassword(user.PasswordHash);
             newUser.IsActive = true;
             newUser.IsVerified = true;
+            newUser.CreatedAt = DateTime.UtcNow;
             await _userRepository.AddAsync(newUser);
+
+            var userRole = new UserRole
+            {
+                UserId = newUser.Id,
+                TenantId = tenantId,
+                RoleId = role.Id
+            };
+            await _userRoleRepository.AddUserRoleAsync(userRole);
 
             await _emailService.SendEmailAsync(
                     newUser.Email,
@@ -126,6 +154,32 @@ namespace SMEFLOWSystem.Application.Services
             var updatedUser = await _userRepository.UpdateUserAsync(userEntity);
             return _mapper.Map<UserDto>(updatedUser);
 
+        }
+
+        public async Task SetUserRoleAsync(Guid userId, List<int> roleIds)
+        {
+            if (roleIds == null || roleIds.Count == 0)
+                throw new ArgumentException("RoleIds không được rỗng");
+
+            var distinctRoleIds = roleIds.Where(r => r > 0).Distinct().ToList();
+            if (distinctRoleIds.Count == 0)
+                throw new ArgumentException("RoleIds không hợp lệ");
+
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+                throw new ArgumentException("Không tìm thấy user");
+
+            var roles = await _roleRepository.GetByIdsAsync(distinctRoleIds);
+            if (roles.Count != distinctRoleIds.Count)
+            {
+                var missing = distinctRoleIds.Except(roles.Select(r => r.Id)).ToList();
+                throw new ArgumentException($"Role không tồn tại: {string.Join(", ", missing)}");
+            }
+
+            if (roles.Any(r => string.Equals(r.Name, "SystemAdmin", StringComparison.OrdinalIgnoreCase)))
+                throw new ArgumentException("Không thể gán role SystemAdmin");
+
+            await _userRoleRepository.ReplaceUserRolesAsync(user.Id, user.TenantId, roles.Select(r => r.Id));
         }
 
         public async Task UpdatePasswordAsync(Guid id, string password)

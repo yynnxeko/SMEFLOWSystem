@@ -182,3 +182,6 @@ d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Release\n
 d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Release\net8.0\SMEFLOWSystem.WebAPI.pdb
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Release\net8.0\SMEFLOWSystem.WebAPI.genruntimeconfig.cache
 D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Release\net8.0\ref\SMEFLOWSystem.WebAPI.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\obj\Release\net8.0\swae.build.ex.cache
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Release\net8.0\VNPAY.NET.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.WebAPI\bin\Release\net8.0\VNPAY.NET.pdb

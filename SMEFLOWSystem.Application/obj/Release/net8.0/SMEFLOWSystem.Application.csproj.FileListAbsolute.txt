@@ -16,3 +16,5 @@ d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Application\obj\Rele
 d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Application\obj\Release\net8.0\refint\SMEFLOWSystem.Application.dll
 d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Application\obj\Release\net8.0\SMEFLOWSystem.Application.pdb
 d:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Application\obj\Release\net8.0\ref\SMEFLOWSystem.Application.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Application\bin\Release\net8.0\VNPAY.NET.dll
+D:\Project\ProjectMonHoc\EXE101\DodoSystem-BE\SMEFLOWSystem.Application\bin\Release\net8.0\VNPAY.NET.pdb

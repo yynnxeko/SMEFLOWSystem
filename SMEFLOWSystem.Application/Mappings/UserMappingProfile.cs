@@ -25,7 +25,8 @@ namespace SMEFLOWSystem.Application.Mappings
                 .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDeleted))
                 .ForMember(dest => dest.TenantName, opt => opt.MapFrom(src => src.Tenant != null ? src.Tenant.Name : string.Empty))
                 // Token thường được sinh ra sau khi login, không lấy trực tiếp từ entity
-                .ForMember(dest => dest.Token, opt => opt.Ignore());
+                .ForMember(dest => dest.Token, opt => opt.Ignore())
+                .ForMember(dest => dest.RefreshToken, opt => opt.Ignore());
 
             
             CreateMap<User, UserCreatedDto>()

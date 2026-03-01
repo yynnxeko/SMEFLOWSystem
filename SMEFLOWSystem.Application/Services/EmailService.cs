@@ -59,8 +59,8 @@ namespace SMEFLOWSystem.Application.Services
                            "Nếu bạn không yêu cầu, vui lòng bỏ qua email này.";
 
             var htmlBody = $@"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>
-<p>Mã này có hiệu lực trong 5 phút.</p>
-<p>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>";
+                           <p>Mã này có hiệu lực trong 5 phút.</p>
+                           <p>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>";
 
             var from = new EmailAddress(_settings.FromEmail, _settings.FromName);
             var to = new EmailAddress(toEmail);

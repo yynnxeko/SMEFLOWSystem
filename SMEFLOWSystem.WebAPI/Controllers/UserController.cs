@@ -50,5 +50,20 @@ namespace SMEFLOWSystem.WebAPI.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [Authorize(Roles = "TenantAdmin")]
+        [HttpPut("{userId:guid}/role")]
+        public async Task<IActionResult> SetUserRole([FromRoute] Guid userId, [FromBody] UserSetRoleDto request)
+        {
+            try
+            {
+                await _userService.SetUserRoleAsync(userId, request.RoleIds);
+                return Ok(new { message = "Cập nhật role thành công" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }

@@ -36,11 +36,22 @@ public class TenantExpirationRecurringJob
     // Runs daily 00:00 VN time
     public async Task SuspendExpiredTenantsAndSendRenewalEmailsAsync()
     {
-        var todayUtc = DateOnly.FromDateTime(DateTime.UtcNow);
-        var expiredTenants = await _tenantRepo.GetExpiredTenantsIgnoreTenantAsync(todayUtc);
+        var now = DateTime.UtcNow;
+        var tenants = await _tenantRepo.GetAllIgnoreTenantAsync();
 
-        foreach (var tenant in expiredTenants)
+        foreach (var tenant in tenants)
         {
+            var subs = await _moduleSubscriptionRepo.GetByTenantIgnoreTenantAsync(tenant.Id);
+            if (subs.Count == 0)
+                continue;
+
+            var hasValidModule = subs.Any(s => !s.IsDeleted
+                                               && (string.Equals(s.Status, StatusEnum.ModuleActive, StringComparison.OrdinalIgnoreCase)
+                                                   || string.Equals(s.Status, StatusEnum.ModuleTrial, StringComparison.OrdinalIgnoreCase))
+                                               && s.EndDate > now);
+            if (hasValidModule)
+                continue;
+
             if (string.Equals(tenant.Status, StatusEnum.TenantSuspended, StringComparison.OrdinalIgnoreCase))
                 continue;
 
@@ -53,7 +64,12 @@ public class TenantExpirationRecurringJob
                 var freshTenant = await _tenantRepo.GetByIdIgnoreTenantAsync(tenant.Id);
                 if (freshTenant == null) return;
 
-                if (!freshTenant.SubscriptionEndDate.HasValue || freshTenant.SubscriptionEndDate.Value >= todayUtc)
+                var freshSubs = await _moduleSubscriptionRepo.GetByTenantIgnoreTenantAsync(freshTenant.Id);
+                var freshHasValidModule = freshSubs.Any(s => !s.IsDeleted
+                                                             && (string.Equals(s.Status, StatusEnum.ModuleActive, StringComparison.OrdinalIgnoreCase)
+                                                             || string.Equals(s.Status, StatusEnum.ModuleTrial, StringComparison.OrdinalIgnoreCase))
+                                                             && s.EndDate > now);
+                if (freshHasValidModule)
                     return;
 
                 freshTenant.Status = StatusEnum.TenantSuspended;
@@ -88,8 +104,7 @@ public class TenantExpirationRecurringJob
                     await _customerRepo.AddAsync(internalCustomer);
                 }
 
-                var subs = await _moduleSubscriptionRepo.GetByTenantIgnoreTenantAsync(freshTenant.Id);
-                var moduleIds = subs
+                var moduleIds = freshSubs
                     .Where(s => !s.IsDeleted)
                     .Select(s => s.ModuleId)
                     .Distinct()

@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SMEFLOWSystem.Core\SMEFLOWSystem.Core.csproj" />
     <ProjectReference Include="..\SMEFLOWSystem.SharedKernel\SMEFLOWSystem.SharedKernel.csproj" />
+    <ProjectReference Include="..\VNPAY.NET\VNPAY.NET.csproj" />
   </ItemGroup>
 
 </Project>

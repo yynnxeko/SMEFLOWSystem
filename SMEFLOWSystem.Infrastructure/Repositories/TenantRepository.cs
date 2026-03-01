@@ -79,11 +79,38 @@ namespace SMEFLOWSystem.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public Task<List<Tenant>> GetAllIgnoreTenantAsync()
+        {
+            return _context.Tenants
+                .IgnoreQueryFilters()
+                .Where(t => !t.IsDeleted)
+                .ToListAsync();
+        }
+
         public async Task<Tenant?> GetByOwnerUserIdIgnoreAsync(Guid ownerId)
         {
             return await _context.Tenants
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.OwnerUserId == ownerId && !x.IsDeleted);
+        }
+
+        public async Task<(List<Tenant> Items, int TotalCount)> GetPagedIgnoreTenantAsync(int pageNumber, int pageSize)
+        {
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            var skip = (pageNumber - 1) * pageSize;
+
+            var query = _context.Tenants
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(t => !t.IsDeleted)
+                .OrderByDescending(t => t.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+            var items = await query.Skip(skip).Take(pageSize).ToListAsync();
+
+            return (items, totalCount);
         }
     }
 }

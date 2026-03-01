@@ -20,5 +20,6 @@ namespace SMEFLOWSystem.Application.Interfaces.IServices
         Task<PagedResultDto<UserDto>> GetAllUsersPagingAsync(PagingRequestDto request);
         Task<UserDto> CreateAsync(UserCreatedDto user, Guid tenantId);
         Task<UserDto> InvitedUserAsync(UserCreatedDto user, Guid tenantId);
+        Task SetUserRoleAsync(Guid userId, List<int> roleIds);
     }
 }

@@ -32,6 +32,7 @@ namespace SMEFLOWSystem.Application.Services
         private readonly IBillingOrderService _billingOrderService;
         private readonly IBillingService _billingService;
         private readonly IMapper _mapper;
+        private readonly IRefreshTokenService _refreshTokenService;
 
         // Constructor Injection
         public AuthService(
@@ -46,7 +47,8 @@ namespace SMEFLOWSystem.Application.Services
             IConfiguration config,
             IBillingOrderService billingOrderService,
             IBillingService billingService,
-            IMapper mapper)
+            IMapper mapper,
+            IRefreshTokenService refreshTokenService)
         {
             _tenantRepo = tenantRepo;
             _userRepo = userRepo;
@@ -60,6 +62,7 @@ namespace SMEFLOWSystem.Application.Services
             _billingOrderService = billingOrderService;
             _billingService = billingService;
             _mapper = mapper;
+            _refreshTokenService = refreshTokenService;
         }
 
         public async Task<bool> RegisterTenantAsync(RegisterRequestDto request)
@@ -188,28 +191,34 @@ namespace SMEFLOWSystem.Application.Services
             var tenant = user.Tenant;
             if (tenant == null) throw new Exception("Không tìm thấy tenant");
 
-            if (tenant.SubscriptionEndDate.HasValue)
-            {
-                var todayUtc = DateOnly.FromDateTime(DateTime.UtcNow);
-                if (tenant.SubscriptionEndDate.Value < todayUtc)
-                {
-                    tenant.Status = StatusEnum.TenantSuspended;
-                    await _tenantRepo.UpdateAsync(tenant);
+            var isSystemAdmin = user.UserRoles?.Any(ur => ur.Role != null
+                                                        && string.Equals(ur.Role.Name, "SystemAdmin", StringComparison.OrdinalIgnoreCase)) == true;
 
+            if (!isSystemAdmin)
+            {
+                // Rule: block tenant login only when ALL modules are expired
+                var subs = await _moduleSubscriptionRepo.GetByTenantIgnoreTenantAsync(tenant.Id);
+                var now = DateTime.UtcNow;
+                var hasValidModule = subs.Any(s => !s.IsDeleted
+                                                   && (string.Equals(s.Status, StatusEnum.ModuleActive, StringComparison.OrdinalIgnoreCase)
+                                                       || string.Equals(s.Status, StatusEnum.ModuleTrial, StringComparison.OrdinalIgnoreCase))
+                                                   && s.EndDate > now);
+                if (!hasValidModule)
                     throw new Exception("Hết hạn trial, thanh toán để tiếp tục");
-                }
             }
 
-            if (string.Equals(tenant.Status, StatusEnum.TenantSuspended, StringComparison.OrdinalIgnoreCase))
-                throw new Exception("Hết hạn trial, thanh toán để tiếp tục");
-
             if (!string.Equals(tenant.Status, StatusEnum.TenantActive, StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(tenant.Status, StatusEnum.TenantTrial, StringComparison.OrdinalIgnoreCase))
+                && !string.Equals(tenant.Status, StatusEnum.TenantTrial, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(tenant.Status, StatusEnum.TenantSuspended, StringComparison.OrdinalIgnoreCase))
                 throw new Exception("Tài khoản công ty chưa sẵn sàng để đăng nhập.");
 
             var token = AuthHelper.GenerateJwtToken(user, _config);
             var userDto =  _mapper.Map<LoginUserDto>(user);
             userDto.Token = token;
+
+            // Issue refresh token for clients that support token refresh.
+            var issued = await _refreshTokenService.IssueAsync(user.Id);
+            userDto.RefreshToken = issued.RefreshToken;
 
             return userDto;
         }

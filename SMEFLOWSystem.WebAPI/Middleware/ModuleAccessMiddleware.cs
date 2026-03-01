@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using ShareKernel.Common.Enum;
 using SMEFLOWSystem.Application.Interfaces.IRepositories;
 using SMEFLOWSystem.SharedKernel.Interfaces;
 using System.Globalization;
+using System.Text.Json;
 
 namespace SMEFLOWSystem.WebAPI.Middleware;
 
@@ -10,10 +12,15 @@ public class ModuleAccessMiddleware
 {
     private readonly RequestDelegate _next;
 
+    private const int SubscriptionCacheSeconds = 300;
+    private const int ModuleCacheSeconds = 3600;
+
+    private sealed record ModuleCacheEntry(int Id);
+    private sealed record SubscriptionCacheEntry(string Status, DateTime EndDate);
+
     private static readonly (string Prefix, string ModuleCode)[] ProtectedPrefixes =
     {
         ("/api/hr", "HR"),
-        ("/api/employees", "HR"),
 
         ("/api/attendances", "ATTENDANCE"),
         ("/api/payrolls", "ATTENDANCE"),
@@ -35,6 +42,7 @@ public class ModuleAccessMiddleware
     public async Task InvokeAsync(
         HttpContext context,
         ICurrentTenantService currentTenantService,
+        IMemoryCache cache,
         IModuleRepository moduleRepo,
         IModuleSubscriptionRepository moduleSubscriptionRepo)
     {
@@ -57,37 +65,56 @@ public class ModuleAccessMiddleware
         var tenantId = currentTenantService.TenantId;
         if (!tenantId.HasValue)
         {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            await context.Response.WriteAsync("Thiếu TenantId");
+            await WriteJsonErrorAsync(context, StatusCodes.Status403Forbidden, "Thiếu TenantId");
             return;
         }
 
-        var module = await moduleRepo.GetByCodeAsync(required.ModuleCode);
-        if (module == null)
+        var moduleCacheKey = $"module:code:{required.ModuleCode}";
+        var moduleEntry = await cache.GetOrCreateAsync(moduleCacheKey, async entry =>
         {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            await context.Response.WriteAsync($"Module '{required.ModuleCode}' chưa được cấu hình");
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(ModuleCacheSeconds);
+            var m = await moduleRepo.GetByCodeAsync(required.ModuleCode);
+            return m == null ? null : new ModuleCacheEntry(m.Id);
+        });
+
+        if (moduleEntry == null)
+        {
+            await WriteJsonErrorAsync(context, StatusCodes.Status403Forbidden, $"Module '{required.ModuleCode}' chưa được cấu hình");
             return;
         }
 
-        var sub = await moduleSubscriptionRepo.GetByTenantAndModuleIgnoreTenantAsync(tenantId.Value, module.Id);
-        if (sub == null || sub.IsDeleted)
+        var subCacheKey = $"moduleSub:tenant:{tenantId.Value}:module:{moduleEntry.Id}";
+        var subEntry = await cache.GetOrCreateAsync(subCacheKey, async entry =>
         {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            await context.Response.WriteAsync($"Bạn chưa đăng ký module {required.ModuleCode}");
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(SubscriptionCacheSeconds);
+            var sub = await moduleSubscriptionRepo.GetByTenantAndModuleIgnoreTenantAsync(tenantId.Value, moduleEntry.Id);
+            if (sub == null) return null;
+            return new SubscriptionCacheEntry(sub.Status ?? string.Empty, sub.EndDate);
+        });
+
+        if (subEntry == null)
+        {
+            await WriteJsonErrorAsync(context, StatusCodes.Status403Forbidden, $"Bạn chưa đăng ký module {required.ModuleCode}");
             return;
         }
 
         var now = DateTime.UtcNow;
-        var validStatus = string.Equals(sub.Status, StatusEnum.ModuleActive, StringComparison.OrdinalIgnoreCase)
-                          || string.Equals(sub.Status, StatusEnum.ModuleTrial, StringComparison.OrdinalIgnoreCase);
-        if (!validStatus || sub.EndDate < now)
+        var validStatus = string.Equals(subEntry.Status, StatusEnum.ModuleActive, StringComparison.OrdinalIgnoreCase)
+                          || string.Equals(subEntry.Status, StatusEnum.ModuleTrial, StringComparison.OrdinalIgnoreCase);
+        if (!validStatus || subEntry.EndDate <= now)
         {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            await context.Response.WriteAsync($"Module {required.ModuleCode} đã hết hạn");
+            await WriteJsonErrorAsync(context, StatusCodes.Status403Forbidden, $"Module {required.ModuleCode} đã hết hạn");
             return;
         }
 
         await _next(context);
+    }
+
+    private static async Task WriteJsonErrorAsync(HttpContext context, int statusCode, string message)
+    {
+        context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/json; charset=utf-8";
+        var payload = JsonSerializer.Serialize(new { error = message });
+        await context.Response.WriteAsync(payload);
     }
 }
