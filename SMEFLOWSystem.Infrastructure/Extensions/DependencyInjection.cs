@@ -2,8 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SMEFLOWSystem.Application.Interfaces.IRepositories;
+using SMEFLOWSystem.Application.Interfaces.IServices;
 using SMEFLOWSystem.Infrastructure.Data;
 using SMEFLOWSystem.Infrastructure.Repositories;
+using SMEFLOWSystem.Infrastructure.Services;
 using SMEFLOWSystem.Infrastructure.Tenancy;
 using SMEFLOWSystem.SharedKernel.Interfaces;
 
@@ -33,11 +35,17 @@ public static class DependencyInjection
         services.AddScoped<IPositionRepository, PositionRepository>();
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
+        services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+        services.AddScoped<IAttendanceSettingRepository, AttendanceSettingRepository>();
+
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         services.AddScoped<ICurrentTenantService, CurrentTenantService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ITransaction, Transaction>();
+
+        services.AddScoped<ICloudinaryService, CloudinaryService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }
