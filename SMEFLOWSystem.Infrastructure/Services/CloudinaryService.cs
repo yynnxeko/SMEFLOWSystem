@@ -1,7 +1,8 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using SMEFLOWSystem.Application.Interfaces.IServices;
+using SMEFLOWSystem.Core.Config;
 
 namespace SMEFLOWSystem.Infrastructure.Services;
 
@@ -9,16 +10,18 @@ public class CloudinaryService : ICloudinaryService
 {
     private readonly Cloudinary _cloudinary;
 
-    public CloudinaryService(IConfiguration configuration)
+    public CloudinaryService(IOptions<CloudinarySettings> settings)
     {
-        var cloudName = configuration["Cloudinary:CloudName"]
-            ?? throw new InvalidOperationException("Cloudinary:CloudName is not configured.");
-        var apiKey = configuration["Cloudinary:ApiKey"]
-            ?? throw new InvalidOperationException("Cloudinary:ApiKey is not configured.");
-        var apiSecret = configuration["Cloudinary:ApiSecret"]
-            ?? throw new InvalidOperationException("Cloudinary:ApiSecret is not configured.");
+        var cfg = settings.Value;
 
-        var account = new Account(cloudName, apiKey, apiSecret);
+        if (string.IsNullOrWhiteSpace(cfg.CloudName))
+            throw new InvalidOperationException("Missing config: Cloudinary:CloudName");
+        if (string.IsNullOrWhiteSpace(cfg.ApiKey))
+            throw new InvalidOperationException("Missing config: Cloudinary:ApiKey");
+        if (string.IsNullOrWhiteSpace(cfg.ApiSecret))
+            throw new InvalidOperationException("Missing config: Cloudinary:ApiSecret");
+
+        var account = new Account(cfg.CloudName, cfg.ApiKey, cfg.ApiSecret);
         _cloudinary = new Cloudinary(account) { Api = { Secure = true } };
     }
 

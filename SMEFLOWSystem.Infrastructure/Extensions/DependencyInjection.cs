@@ -46,6 +46,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICloudinaryService, CloudinaryService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IFaceVerificationService, AzureFaceVerificationService>();
 
         return services;
     }

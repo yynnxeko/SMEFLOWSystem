@@ -17,5 +17,7 @@ namespace SMEFLOWSystem.Application.Interfaces.IServices.System
         Task<List<AttendanceDto>> GetMyHistoryAsync(DateOnly from, DateOnly to);
         Task<AttendanceDto> GetByIdAsync(Guid id);
         Task<AttendanceDto> ApproveAsync(Guid attendanceId, AttendanceApproveDto dto);
+        Task<AttendanceConfigResponseDto> GetConfigAsync();
+        Task<AttendanceConfigResponseDto> UpsertConfigAsync(AttendanceConfigDto dto);
     }
 }

@@ -20,6 +20,7 @@ public class AttendanceService : IAttendanceService
     private readonly ICurrentUserService _currentUser;
     private readonly ICurrentTenantService _currentTenant;
     private readonly ICloudinaryService _cloudinary;
+    private readonly IFaceVerificationService _faceService;
     private readonly IMapper _mapper;
 
     public AttendanceService(
@@ -29,6 +30,7 @@ public class AttendanceService : IAttendanceService
         ICurrentUserService currentUser,
         ICurrentTenantService currentTenant,
         ICloudinaryService cloudinary,
+        IFaceVerificationService faceService,
         IMapper mapper)
     {
         _attendanceRepo = attendanceRepo;
@@ -37,12 +39,10 @@ public class AttendanceService : IAttendanceService
         _currentUser = currentUser;
         _currentTenant = currentTenant;
         _cloudinary = cloudinary;
+        _faceService = faceService;
         _mapper = mapper;
     }
 
-    // ─────────────────────────────────────────────────────────
-    // CHECK-IN
-    // ─────────────────────────────────────────────────────────
     public async Task<AttendanceDto> CheckInAsync(CheckInRequestDto request)
     {
         var userId = _currentUser.RequireUserId();
@@ -75,6 +75,14 @@ public class AttendanceService : IAttendanceService
             }
         }
 
+        // Upload selfie
+        string? selfieUrl = !string.IsNullOrEmpty(request.SelfieBase64)
+            ? await _cloudinary.UploadBase64Async(request.SelfieBase64, "attendance/checkin")
+            : null;
+
+        // Face verification
+        await VerifyFaceAsync(selfieUrl, employee);
+
         var attendance = new Attendance
         {
             Id = Guid.NewGuid(),
@@ -84,9 +92,7 @@ public class AttendanceService : IAttendanceService
             CheckInTime = checkInTime,
             CheckInLatitude = request.Latitude,
             CheckInLongitude = request.Longitude,
-            CheckInSelfieUrl = !string.IsNullOrEmpty(request.SelfieBase64)
-                ? await _cloudinary.UploadBase64Async(request.SelfieBase64, "attendance/checkin")
-                : null,
+            CheckInSelfieUrl = selfieUrl,
             Status = status,
             LateMinutes = lateMinutes,
             CreatedAt = DateTime.UtcNow
@@ -96,9 +102,6 @@ public class AttendanceService : IAttendanceService
         return _mapper.Map<AttendanceDto>(attendance);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // CHECK-OUT
-    // ─────────────────────────────────────────────────────────
     public async Task<AttendanceDto> CheckOutAsync(CheckOutRequestDto request)
     {
         var userId = _currentUser.RequireUserId();
@@ -116,12 +119,19 @@ public class AttendanceService : IAttendanceService
         ValidateGps(request.Latitude, request.Longitude, setting);
 
         var checkOutTime = DateTime.UtcNow;
+
+        // Upload selfie
+        string? selfieUrl = !string.IsNullOrEmpty(request.SelfieBase64)
+            ? await _cloudinary.UploadBase64Async(request.SelfieBase64, "attendance/checkout")
+            : null;
+
+        // Face verification
+        await VerifyFaceAsync(selfieUrl, employee);
+
         attendance.CheckOutTime = checkOutTime;
         attendance.CheckOutLatitude = request.Latitude;
         attendance.CheckOutLongitude = request.Longitude;
-        attendance.CheckOutSelfieUrl = !string.IsNullOrEmpty(request.SelfieBase64)
-            ? await _cloudinary.UploadBase64Async(request.SelfieBase64, "attendance/checkout")
-            : null;
+        attendance.CheckOutSelfieUrl = selfieUrl;
         attendance.UpdatedAt = DateTime.UtcNow;
 
         // Tính EarlyLeave
@@ -140,9 +150,6 @@ public class AttendanceService : IAttendanceService
         return _mapper.Map<AttendanceDto>(attendance);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // MY STATUS (hôm nay)
-    // ─────────────────────────────────────────────────────────
     public async Task<AttendanceStatusDto> GetMyStatusAsync(DateOnly date)
     {
         var userId = _currentUser.RequireUserId();
@@ -162,9 +169,6 @@ public class AttendanceService : IAttendanceService
         };
     }
 
-    // ─────────────────────────────────────────────────────────
-    // MY HISTORY
-    // ─────────────────────────────────────────────────────────
     public async Task<List<AttendanceDto>> GetMyHistoryAsync(DateOnly from, DateOnly to)
     {
         var userId = _currentUser.RequireUserId();
@@ -173,9 +177,6 @@ public class AttendanceService : IAttendanceService
         return _mapper.Map<List<AttendanceDto>>(records);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // GET BY ID
-    // ─────────────────────────────────────────────────────────
     public async Task<AttendanceDto> GetByIdAsync(Guid id)
     {
         _currentUser.RequireUserId();
@@ -184,9 +185,6 @@ public class AttendanceService : IAttendanceService
         return _mapper.Map<AttendanceDto>(record);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // GET PAGED (Manager / Admin)
-    // ─────────────────────────────────────────────────────────
     public async Task<PagedResultDto<AttendanceDto>> GetPagedAsync(AttendanceQueryDto query)
     {
         var userId = _currentUser.RequireUserId();
@@ -228,9 +226,6 @@ public class AttendanceService : IAttendanceService
         };
     }
 
-    // ─────────────────────────────────────────────────────────
-    // APPROVE / REJECT
-    // ─────────────────────────────────────────────────────────
     public async Task<AttendanceDto> ApproveAsync(Guid attendanceId, AttendanceApproveDto dto)
     {
         var userId = _currentUser.RequireUserId();
@@ -279,9 +274,41 @@ public class AttendanceService : IAttendanceService
         return _mapper.Map<AttendanceDto>(record);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // HELPERS
-    // ─────────────────────────────────────────────────────────
+    public async Task<AttendanceConfigResponseDto> GetConfigAsync()
+    {
+        var tenantId = _currentTenant.TenantId ?? throw new UnauthorizedAccessException("Unauthenticated");
+        var setting = await _settingRepo.GetByTenantIdAsync(tenantId);
+
+        if (setting == null)
+            return new AttendanceConfigResponseDto { CheckInRadiusMeters = 100, LateThresholdMinutes = 10, EarlyLeaveThresholdMinutes = 10 };
+
+        return _mapper.Map<AttendanceConfigResponseDto>(setting);
+    }
+
+    public async Task<AttendanceConfigResponseDto> UpsertConfigAsync(AttendanceConfigDto dto)
+    {
+        _currentUser.EnsureAdmin();
+
+        var tenantId = _currentTenant.TenantId ?? throw new UnauthorizedAccessException("Unauthenticated");
+        var existing = await _settingRepo.GetByTenantIdAsync(tenantId);
+
+        if (existing == null)
+        {
+            existing = new TenantAttendanceSetting
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+
+        _mapper.Map(dto, existing);
+        existing.UpdatedAt = DateTime.UtcNow;
+
+        await _settingRepo.UpsertAsync(existing);
+        return _mapper.Map<AttendanceConfigResponseDto>(existing);
+    }
+
     private async Task<Employee> RequireEmployeeAsync(Guid userId)
     {
         return await _employeeRepo.GetByUserIdAsync(userId)
@@ -307,5 +334,26 @@ public class AttendanceService : IAttendanceService
         if (distance > setting.CheckInRadiusMeters)
             throw new InvalidOperationException(
                 $"Vị trí không hợp lệ. Bạn đang cách văn phòng {distance:F0}m (tối đa {setting.CheckInRadiusMeters}m).");
+    }
+
+    private async Task VerifyFaceAsync(string? selfieUrl, Employee employee)
+    {
+        if (string.IsNullOrEmpty(selfieUrl)) return;
+
+        // Lấy avatar từ User
+        var avatarUrl = employee.User?.AvatarUrl;
+        if (string.IsNullOrEmpty(avatarUrl)) return; // Chưa có avatar → skip verification
+
+        var result = await _faceService.VerifyAsync(selfieUrl, avatarUrl);
+        if (!result.IsMatch)
+        {
+            // Xóa selfie đã upload (không lưu ảnh fail)
+            try { await _cloudinary.DeleteAsync(selfieUrl); } catch {}
+
+            var message = !string.IsNullOrEmpty(result.ErrorMessage)
+                ? result.ErrorMessage
+                : $"Xác minh khuôn mặt thất bại (confidence: {result.Confidence:P0}).";
+            throw new InvalidOperationException(message);
+        }
     }
 }
